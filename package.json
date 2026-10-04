@@ -1,0 +1,20 @@
+{
+  "name": "elay-menu",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/shared",
+    "apps/api",
+    "apps/web"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "build": "npm run build -w @elay/shared && npm run build -w @elay/api && npm run build -w @elay/web",
+    "typecheck": "npm run build -w @elay/shared && npm run typecheck -w @elay/api && npm run typecheck -w @elay/web",
+    "test": "npm run build -w @elay/shared && npm run test -w @elay/shared && npm run test -w @elay/api",
+    "dev:api": "npm run dev -w @elay/api",
+    "dev:web": "npm run dev -w @elay/web"
+  }
+}

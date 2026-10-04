@@ -3,6 +3,8 @@ node_modules/
 dist/
 build/
 coverage/
+# local API media during non-Docker development
+apps/api/data/
 .playwright/
 test-results/
 

@@ -1,0 +1,33 @@
+/* App shell. Component classes come from bundle.css (copied verbatim from the design handoff). */
+html,
+body {
+  margin: 0;
+  background: var(--paper);
+}
+/* 390px reference, centred column capped at 480px on wider screens. */
+.app-column {
+  max-width: 480px;
+  min-height: 100vh;
+  margin: 0 auto;
+  position: relative;
+}
+.el *,
+.el *::before,
+.el *::after {
+  box-sizing: border-box;
+}
+/* Layout helpers mirroring the handoff screen canvas (screens/html/el.css). */
+.pad {
+  padding: 0 var(--space-4);
+}
+.mt-2 { margin-top: var(--space-2); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-6 { margin-top: var(--space-6); }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

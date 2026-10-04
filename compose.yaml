@@ -1,0 +1,62 @@
+# Elay Menu: web (nginx + built Vue app, proxies /api) -> api (Fastify) -> mongo.
+# Only `web` publishes a host port. MongoDB is reachable solely on the internal network (no 27017 on the host).
+# Values come from an optional local .env (create with 06-CREATE-LOCAL-ENV.cmd); defaults below are safe.
+services:
+  mongo:
+    image: mongo:8.0
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      API_HOST: 0.0.0.0
+      API_PORT: "3000"
+      MONGODB_URI: mongodb://mongo:27017/elay
+      MEDIA_DIR: /data/media
+      PUBLIC_MENU_URL: ${PUBLIC_MENU_URL:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      SESSION_TTL_HOURS: ${SESSION_TTL_HOURS:-12}
+      LOGIN_RATE_LIMIT_PER_15M: ${LOGIN_RATE_LIMIT_PER_15M:-10}
+      # The API is only reachable through the web proxy, which overwrites forwarding headers.
+      TRUST_PROXY: "true"
+    volumes:
+      - media:/data/media
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongo-data:
+  media:

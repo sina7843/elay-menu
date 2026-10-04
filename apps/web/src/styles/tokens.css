@@ -1,0 +1,84 @@
+/* ال‌آی — توکن‌ها (تولید شده از tokens.json). فقط تم روشن. */
+@import url("./fonts/rokh.css");
+:root{
+  --paper:#EFE8DA;
+  --surface:#F8F3EA;
+  --surface-sunken:#E6DBC6;
+  --line:rgba(27,21,18,0.18);
+  --line-strong:#1B1512;
+  --ink:#1B1512;
+  --ink-muted:#5A4E45;
+  --ink-subtle:#6E6155;
+  --accent:#9C3A1F;
+  --accent-strong:#7A2C16;
+  --on-accent:#F6EFE2;
+  --inverse:#1B1512;
+  --on-inverse:#EFE8DA;
+  --gold:#E3B866;
+  --success:#4A5A17;
+  --success-soft:#DDE3C6;
+  --on-success-soft:#3A4712;
+  --section-deal:#D4A387;
+  --section-popular:#C9B68B;
+  --on-section:#1B1512;
+  --on-section-muted:#3F2A20;
+  --food-tint-1:#E6DBC6;
+  --food-tint-2:#E9D2C3;
+  --food-tint-3:#E4D3B4;
+  --food-tint-4:#DCD8BC;
+  --plate:#F8F3EA;
+  --focus:#9C3A1F;
+  --tribal-sand:#E2D3B6;
+  --tribal-clay:#B5553A;
+  --tribal-ochre:#C9A86A;
+  --tribal-earth:#3A2E27;
+  --danger-soft:#F3DDD3;
+  --on-danger-soft:#7A2C16;
+  --overlay:rgba(27,21,18,0.5);
+  --disabled:#E6DBC6;
+  --on-disabled:#7E7164;
+  --skeleton:#DDD0B8;
+  --skeleton-hi:#F1EBDF;
+  --on-inverse-success:#A9C46A;
+  --crop-mask:rgba(27,21,18,0.62);
+  --crop-grid:rgba(239,232,218,0.45);
+  --space-1:4px;
+  --space-2:8px;
+  --space-3:12px;
+  --space-4:16px;
+  --space-5:20px;
+  --space-6:24px;
+  --space-7:28px;
+  --space-8:32px;
+  --radius-none:0px;
+  --radius-pill:999px;
+  --touch:44px;
+  --header-h:70px;
+  --search-h:56px;
+  --order-bar-h:68px;
+  --food-img:108px;
+  --food-img-sm:92px;
+  --food-card-w:168px;
+  --logo-chip:26px;
+  --stall-logo:104px;
+  --shadow-card:0 2px 0 rgba(27,21,18,0.08);
+  --shadow-food:0 6px 8px rgba(27,21,18,0.18);
+  --shadow-sheet:0 -8px 30px rgba(27,21,18,0.25);
+  --font-rokh:"Rokh FaNum", Tahoma, "Segoe UI", sans-serif
+}
+.t-display{font-family:var(--font-rokh);font-size:40px;line-height:48px;font-weight:900}
+.t-h1{font-family:var(--font-rokh);font-size:36px;line-height:44px;font-weight:900}
+.t-section{font-family:var(--font-rokh);font-size:22px;line-height:30px;font-weight:900}
+.t-group-title{font-family:var(--font-rokh);font-size:20px;line-height:28px;font-weight:900}
+.t-header-title{font-family:var(--font-rokh);font-size:16px;line-height:24px;font-weight:800}
+.t-food-name{font-family:var(--font-rokh);font-size:17px;line-height:25px;font-weight:800}
+.t-food-name-sm{font-family:var(--font-rokh);font-size:15px;line-height:22px;font-weight:800}
+.t-body{font-family:var(--font-rokh);font-size:13px;line-height:22px;font-weight:400}
+.t-price{font-family:var(--font-rokh);font-size:17px;line-height:20px;font-weight:900}
+.t-price-sm{font-family:var(--font-rokh);font-size:16px;line-height:19px;font-weight:900}
+.t-price-old{font-family:var(--font-rokh);font-size:12px;line-height:16px;font-weight:400}
+.t-total{font-family:var(--font-rokh);font-size:28px;line-height:34px;font-weight:900}
+.t-label{font-family:var(--font-rokh);font-size:14px;line-height:20px;font-weight:700}
+.t-tile-label{font-family:var(--font-rokh);font-size:12px;line-height:16px;font-weight:700}
+.t-meta{font-family:var(--font-rokh);font-size:12px;line-height:18px;font-weight:700}
+.t-caption{font-family:var(--font-rokh);font-size:11px;line-height:16px;font-weight:700}

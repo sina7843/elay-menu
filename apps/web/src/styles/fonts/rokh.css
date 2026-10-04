@@ -1,0 +1,6 @@
+/* Rokh FaNum (ارقام فارسی). ascent/descent override متن فارسی را دقیقاً وسط دکمه‌ها و کنار آیکون‌ها می‌نشاند؛ حذفش نکنید. */
+@font-face{font-family:"Rokh FaNum";src:url("RokhFaNum-Regular.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;ascent-override:94%;descent-override:34%;line-gap-override:0%}
+@font-face{font-family:"Rokh FaNum";src:url("RokhFaNum-Medium.woff2") format("woff2");font-weight:500;font-style:normal;font-display:swap;ascent-override:94%;descent-override:34%;line-gap-override:0%}
+@font-face{font-family:"Rokh FaNum";src:url("RokhFaNum-Bold.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap;ascent-override:94%;descent-override:34%;line-gap-override:0%}
+@font-face{font-family:"Rokh FaNum";src:url("RokhFaNum-ExtraBold.woff2") format("woff2");font-weight:800;font-style:normal;font-display:swap;ascent-override:94%;descent-override:34%;line-gap-override:0%}
+@font-face{font-family:"Rokh FaNum";src:url("RokhFaNum-Black.woff2") format("woff2");font-weight:900;font-style:normal;font-display:swap;ascent-override:94%;descent-override:34%;line-gap-override:0%}

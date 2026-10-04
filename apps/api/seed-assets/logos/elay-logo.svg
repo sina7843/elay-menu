@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="694" height="367" viewBox="0 0 694 367" role="img" aria-labelledby="title">
+  <title id="title">Elay logo</title>
+  <defs>
+    <linearGradient id="rust" x1="0" y1="106" x2="0" y2="359" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9c401d"/>
+      <stop offset="1" stop-color="#9f3f1d"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="337" y1="28" x2="337" y2="249" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#e8a736"/>
+      <stop offset="1" stop-color="#eaaa3c"/>
+    </linearGradient>
+    <linearGradient id="olive" x1="365" y1="140" x2="630" y2="359" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9b8d3d"/>
+      <stop offset="1" stop-color="#9f913f"/>
+    </linearGradient>
+  </defs>
+  <g fill="url(#rust)">
+    <path d="M29 106.5H177V161L75 140.8V324.1L145.5 303V358.5H29Z"/>
+    <path d="M80.4 240.5 117.8 217.7 118.2 262.7Z"/>
+    <path d="M158.8 358.5 203.3 172.7 239.7 311.4 305.7 329V358.5Z"/>
+  </g>
+  <g fill="url(#gold)">
+    <path d="M443.4 122.9C432.9 71.4 397.2 29 344 28.6C293.6 27.1 255.5 59.7 238.8 101.2C221.9 143.3 231.4 187.3 258.6 216.3C277 236 301.7 246.9 329.6 247.2C310.3 237.6 294.3 223.2 282.5 205.3C265.1 178.8 260.2 147.2 271.3 118.4C284.5 84.2 314.8 61.3 344.9 61.2C389.8 59.4 422.5 85.5 443.4 122.9Z"/>
+    <path d="M397.2 124C395.2 101.7 378.4 82.5 355.5 81.5C331.6 79.4 310 93.3 302.1 114.8C293.8 137.1 301.6 160.4 318.4 173.3C325.4 179.2 333.7 182.1 342.3 182.8C331.1 170.8 324 158.9 326.6 143.7C329.5 124.9 343.4 108.4 359.7 106.3C374.2 104.1 386.5 112.2 397.2 124Z"/>
+  </g>
+  <g fill="url(#olive)">
+    <path fill-rule="evenodd" d="M320.6 358.5 366.2 142.4 437.8 147.1 545.8 358.5H512.1L478.1 317.2H387.1L378.7 358.5ZM391.6 285.7H468.8L444.9 247.2 398.5 242.8Z"/>
+    <path d="M488.8 146 558.6 110.6 590.7 186.5 693.2 124.1 599 233.2 636.5 358.5H559.5V233.8Z"/>
+  </g>
+</svg>
