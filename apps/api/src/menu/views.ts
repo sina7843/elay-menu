@@ -19,7 +19,7 @@ const id = (o: ObjectId) => o.toHexString();
 
 export function statusOf(s: StallDoc, now: Date) {
   const st = stallStatus(s.weeklyHours, s.manualOverride, now);
-  return { isOpen: st.isOpen, opensAt: st.opensAt?.toISOString() ?? null };
+  return { isOpen: st.isOpen, opensAt: st.opensAt?.toISOString() ?? null, closesAt: st.closesAt?.toISOString() ?? null };
 }
 
 export function pricing(f: FoodDoc, today: string) {
@@ -101,7 +101,7 @@ export async function weeklyAdds(ctx: Ctx, now: Date): Promise<Map<string, numbe
 export interface Menu {
   now: Date;
   today: string;
-  stalls: (StallDoc & { status: { isOpen: boolean; opensAt: string | null } })[];
+  stalls: (StallDoc & { status: { isOpen: boolean; opensAt: string | null; closesAt: string | null } })[];
   categories: CategoryDoc[];
   stallCategories: StallCategoryDoc[];
   /** Foods of visible stalls, in menu order (stall, stall category, creation). */

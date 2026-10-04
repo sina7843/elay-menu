@@ -35,13 +35,41 @@ export function nextOpeningStart(week: WeeklySchedule, at: Date): Date | null {
   return null;
 }
 
+/** End of the scheduled interval containing `at` (today's, or yesterday's past-midnight one), else null. */
+export function scheduledIntervalEnd(week: WeeklySchedule, at: Date): Date | null {
+  const { date, minutes, weekday } = tehranParts(at);
+  const today = week[weekday]!;
+  if (!today.closed) {
+    const open = toMinutes(today.open);
+    const close = toMinutes(today.close);
+    if (close > open && minutes >= open && minutes < close) return tehranInstant(date, close);
+    if (close < open && minutes >= open) return tehranInstant(addDays(date, 1), close);
+  }
+  const yesterday = week[(weekday + 6) % 7]!;
+  const yClose = toMinutes(yesterday.close);
+  if (!yesterday.closed && yClose < toMinutes(yesterday.open) && minutes < yClose) return tehranInstant(date, yClose);
+  return null;
+}
+
 const isActive = (o: Override | null, at: Date): o is Override => !!o && (o.until === null || at < o.until);
 
-export function stallStatus(week: WeeklySchedule, override: Override | null, at: Date): { isOpen: boolean; opensAt: Date | null } {
+export interface StallStatus {
+  isOpen: boolean;
+  /** When closed: next opening, or null when none is scheduled. */
+  opensAt: Date | null;
+  /** When open: when the current opening ends, or null when unknown (open override with no end). */
+  closesAt: Date | null;
+}
+
+export function stallStatus(week: WeeklySchedule, override: Override | null, at: Date): StallStatus {
   const active = isActive(override, at);
   const isOpen = active ? override.state === 'open' : isScheduledOpen(week, at);
-  if (isOpen) return { isOpen, opensAt: null };
-  return { isOpen, opensAt: active && override.until ? override.until : nextOpeningStart(week, at) };
+  if (isOpen) {
+    // An "open" override hands over to the schedule at `until`, which then runs to its own end.
+    const closesAt = active ? (override.until ? scheduledIntervalEnd(week, override.until) : null) : scheduledIntervalEnd(week, at);
+    return { isOpen, opensAt: null, closesAt };
+  }
+  return { isOpen, opensAt: active && override.until ? override.until : nextOpeningStart(week, at), closesAt: null };
 }
 
 /**

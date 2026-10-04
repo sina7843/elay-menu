@@ -74,6 +74,17 @@ describe('schedules', () => {
     expect(stallStatus(week, null, local('2026-10-05', '03:00')).opensAt).toEqual(local('2026-10-05', '18:00'));
   });
 
+  it('reports when the current opening ends, including overnight and open overrides', () => {
+    const night = every('18:00', '02:00');
+    expect(stallStatus(night, null, local('2026-10-04', '20:00')).closesAt).toEqual(local('2026-10-05', '02:00'));
+    expect(stallStatus(night, null, local('2026-10-05', '01:00')).closesAt).toEqual(local('2026-10-05', '02:00'));
+    const day = every('12:00', '23:30');
+    expect(stallStatus(day, null, local('2026-10-04', '13:00')).closesAt).toEqual(local('2026-10-04', '23:30'));
+    const early = overrideFor(day, true, local('2026-10-04', '09:00'))!;
+    expect(stallStatus(day, early, local('2026-10-04', '10:00')).closesAt).toEqual(local('2026-10-04', '23:30'));
+    expect(stallStatus(every('12:00', '23:00', true), { state: 'open', until: null }, local('2026-10-04', '10:00')).closesAt).toBeNull();
+  });
+
   it('only counts yesterday overnight when yesterday is open', () => {
     const week = every('18:00', '02:00');
     week[1] = { closed: true, open: '18:00', close: '02:00' }; // Sunday closed
@@ -91,7 +102,7 @@ describe('schedules', () => {
     const set = local('2026-10-04', '20:00'); // open by schedule
     const o = overrideFor(week, false, set)!;
     expect(o).toEqual({ state: 'closed', until: local('2026-10-05', '12:00') });
-    expect(stallStatus(week, o, local('2026-10-04', '21:00'))).toEqual({ isOpen: false, opensAt: local('2026-10-05', '12:00') });
+    expect(stallStatus(week, o, local('2026-10-04', '21:00'))).toEqual({ isOpen: false, opensAt: local('2026-10-05', '12:00'), closesAt: null });
     expect(stallStatus(week, o, local('2026-10-05', '11:59')).isOpen).toBe(false);
     expect(stallStatus(week, o, local('2026-10-05', '12:00')).isOpen).toBe(true);
     // Choosing what the schedule already says clears the override.
@@ -119,7 +130,7 @@ describe('schedules', () => {
   it('never invents an opening time when every day is closed', () => {
     const week = every('12:00', '23:00', true);
     expect(nextOpeningStart(week, at('2026-10-04T10:00:00Z'))).toBeNull();
-    expect(stallStatus(week, null, at('2026-10-04T10:00:00Z'))).toEqual({ isOpen: false, opensAt: null });
+    expect(stallStatus(week, null, at('2026-10-04T10:00:00Z'))).toEqual({ isOpen: false, opensAt: null, closesAt: null });
     const o = overrideFor(week, true, at('2026-10-04T10:00:00Z'))!;
     expect(o.until).toBeNull();
     expect(stallStatus(week, o, at('2027-01-01T10:00:00Z')).isOpen).toBe(true);

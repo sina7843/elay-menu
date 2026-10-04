@@ -73,7 +73,7 @@ request also needs `x-csrf-token`. Lists come in display order (`sortOrder`).
 
 | Method | Path | Request | Response |
 | --- | --- | --- | --- |
-| GET | `/api/public/menu` | — | `PublicMenuSchema`: foodcourt; categories (+`foodCount`); visible stalls (+`isOpen`, `opensAt`, `foodCount`); stall categories; foods (+`finalPrice`, `discountPercent`); `dealIds`; `popularIds`; `generatedAt`. Menu closed → only `foodcourt`, every list empty. |
+| GET | `/api/public/menu` | — | `PublicMenuSchema`: foodcourt; categories (+`foodCount`); visible stalls (+`isOpen`, `opensAt`, `closesAt`, `foodCount`); stall categories; foods (+`finalPrice`, `discountPercent`); `dealIds`; `popularIds`; `generatedAt`. Menu closed → only `foodcourt`, every list empty. |
 | GET | `/api/public/search` | `SearchQuerySchema`: `q`, `stallId`, `categoryId`, `onlyOpen`, `onlyDiscounted`, `minPrice`/`maxPrice` (inclusive, on `finalPrice`), `sort=default\|cheapest\|priciest\|popular` | `PublicSearchResponseSchema` `{ stalls, foods }` (stalls only when `q` is set). 403 `MENU_CLOSED`. |
 | POST | `/api/public/popularity` | `PopularityEventSchema` `{ foodId }`, one call per successful "+" (add or increment) | 204; 404 hidden/unknown; 409 sold out; 409 `STALL_CLOSED`; 403 `MENU_CLOSED`; 429 over 60/min |
 | GET | `/api/media/:name` | — | image bytes (`nosniff`, sandboxing CSP) |
@@ -94,7 +94,7 @@ under one's own stall path → 404.
 
 | Method | Path | Request | Response |
 | --- | --- | --- | --- |
-| GET | (the stall) | — | `AdminStallSchema` (status, override, `foodCount`, `adminUsername`) |
+| GET | (the stall) | — | `AdminStallSchema` (status incl. `opensAt`/`closesAt`, override, `foodCount`, `adminUsername`) |
 | PUT | `/profile` | `StallProfileInputSchema` `{ intro, weeklyHours }` | `AdminStall`; an active override is re-anchored to the new hours |
 | PUT | `/manual-status` | `ManualStatusInputSchema` `{ isOpen }` | `AdminStall`. Differs from schedule → override until the next scheduled opening start (`null` if none); same as schedule → override cleared |
 | GET / POST | `/categories` | `StallCategoryInputSchema` `{ name }` | `AdminStallCategorySchema[]` / 201 |

@@ -11,18 +11,17 @@ body {
   margin: 0 auto;
   position: relative;
 }
-.el *,
-.el *::before,
-.el *::after {
-  box-sizing: border-box;
-}
-/* Layout helpers mirroring the handoff screen canvas (screens/html/el.css). */
-.pad {
-  padding: 0 var(--space-4);
-}
+/* Layout helpers from the handoff screen canvas (screens/html/el.css). */
+.pad { padding: 0 var(--space-4); }
+.mt-1 { margin-top: var(--space-1); }
 .mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
 .mt-4 { margin-top: var(--space-4); }
+.mt-5 { margin-top: var(--space-5); }
 .mt-6 { margin-top: var(--space-6); }
+.mt-7 { margin-top: var(--space-7); }
+.mt-8 { margin-top: var(--space-8); }
+.muted { color: var(--ink-muted); }
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -31,3 +30,40 @@ body {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* The canvas positions these inside a 390px frame; in the app they float over the viewport,
+   kept inside the 480px column (12px side gaps, 16px + safe area from the bottom). */
+.float-bar {
+  position: fixed;
+  z-index: 10;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  left: max(12px, calc((100vw - 480px) / 2 + 12px));
+  right: max(12px, calc((100vw - 480px) / 2 + 12px));
+}
+/* Room so the last row is not hidden behind the floating bar (canvas: .pg padding-bottom 110px). */
+.order-bar-space { height: 110px; }
+.app-layer {
+  position: fixed;
+  z-index: 30;
+  inset: 0;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.app-layer .el-sheet {
+  position: fixed;
+  max-width: 480px;
+  margin: 0 auto;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+.app-layer .el-overlay { position: fixed; }
+.app-layer .ad-dialog { position: fixed; max-width: 448px; margin: 0 auto; }
+
+/* Touch target: short tab labels (e.g. «برگرها») are narrower than 44px. */
+.el-tab { min-width: var(--touch); }
+.el-promo__head a { min-width: var(--touch); justify-content: center; }
+/* Outline stepper buttons are 41px inside a 1.5px border; let the hit area cover the border (44px). */
+.el-stepper--outline button { height: var(--touch); margin: -1.5px 0; }
+/* Rail cards (168px) cannot fit price + stepper on one line: the stepper wraps under the price. */
+.el-food-card__foot { flex-wrap: wrap; row-gap: 8px; }

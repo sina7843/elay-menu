@@ -4,9 +4,7 @@ Mobile web menu for the Elay food court, with a stall-admin panel and a super-ad
 Persian, right-to-left, light theme only. The app takes no orders and no payments: the order list stays
 on the customer's phone and is read aloud to each stall's cashier.
 
-Status: DRAGON-01. The API behind the customer menu and both panels is complete and tested
-(see `docs/api.md`); the web app still has only shells. Customer screens arrive in DRAGON-02 and panel
-screens in DRAGON-03/04.
+Status: DRAGON-02. The customer menu is complete (all 14 handoff customer screens on live API data, local order list, offline cache). The stall-admin and super-admin screens arrive in DRAGON-03/04; their API is ready (see `docs/api.md`).
 
 ## Layout
 
@@ -56,7 +54,11 @@ npm run dev:web     # http://localhost:5173, proxies /api to the API
 npm run typecheck   # shared build + api tsc + vue-tsc
 npm test            # shared unit tests + API tests (in-memory MongoDB, or MONGODB_TEST_URI)
 npm run build
+npm run test:e2e    # browser tests: production build + real API on in-memory MongoDB (Playwright Chromium)
 ```
+
+First run of the browser tests needs `npx -w @elay/web playwright install chromium`. Screenshots of the real app for
+design review: `SCREEN_DIR=<folder> npm run screens -w @elay/web`.
 
 ## Accounts
 

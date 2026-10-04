@@ -6,3 +6,7 @@ import './styles/bundle.css';
 import './styles/app.css';
 
 createApp(App).use(router).mount('#app');
+
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  void navigator.serviceWorker.register('/sw.js').catch(() => undefined);
+}

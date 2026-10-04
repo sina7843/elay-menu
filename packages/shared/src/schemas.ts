@@ -233,6 +233,8 @@ export const PublicStallSchema = z.strictObject({
   isOpen: z.boolean(),
   /** Start of the next opening, when closed and one exists. */
   opensAt: Instant.nullable(),
+  /** End of the current opening, when open and known. */
+  closesAt: Instant.nullable(),
   sortOrder: z.number().int(),
   foodCount: z.number().int(),
 });
@@ -307,6 +309,7 @@ export const AdminStallSchema = z.strictObject({
   manualOverride: ManualOverrideSchema.nullable(),
   isOpen: z.boolean(),
   opensAt: Instant.nullable(),
+  closesAt: Instant.nullable(),
   sortOrder: z.number().int(),
   visible: z.boolean(),
   isDemo: z.boolean(),
