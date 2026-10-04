@@ -181,7 +181,7 @@ const err = (k: string) => (errors[k] ? { 'aria-invalid': true as const, 'aria-d
   <form v-else class="pad panel-form" novalidate @submit.prevent="save">
     <section class="ad-section">
       <h2>عکس غذا</h2>
-      <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/webp" class="visually-hidden" tabindex="-1" @change="chosen" />
+      <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/webp" class="visually-hidden" tabindex="-1" aria-hidden="true" @change="chosen" />
       <div class="ad-upload">
         <FoodImage v-if="form.imageUrl" :food="tile" />
         <button v-else type="button" class="ad-upload__drop" :aria-busy="uploading" v-bind="err('image')" @click="pick">

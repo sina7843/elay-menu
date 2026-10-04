@@ -67,6 +67,12 @@ describe('login / me / logout', () => {
     expectError(await t.app.inject({ url: '/api/auth/me', headers: authed(s) }), 401, 'UNAUTHENTICATED');
   });
 
+  it('accepts Persian or Arabic-Indic digits for ASCII digits in passwords (Rokh FaNum shows them as Persian)', async () => {
+    await createAccount(t.db, 'digits', 'abc12345x', 'super_admin');
+    for (const password of ['abc12345x', 'abc۱۲۳۴۵x', 'abc١٢٣٤٥x']) await login(t.app, 'digits', password);
+    await expect(login(t.app, 'digits', 'abc12346x')).rejects.toThrow();
+  });
+
   it('rejects unauthenticated and forged-cookie requests', async () => {
     expectError(await t.app.inject('/api/auth/me'), 401, 'UNAUTHENTICATED');
     expectError(await t.app.inject({ url: '/api/auth/me', headers: { cookie: 'elay_sid=forged' } }), 401, 'UNAUTHENTICATED');
@@ -211,6 +217,26 @@ describe('origin check behind the proxy (TRUST_PROXY=true, as in compose)', () =
         headers: { host: 'api:3000', 'x-forwarded-host': 'menu.example', origin: 'https://evil.example' },
       });
       expectError(cross, 403, 'CSRF_FAILED');
+    } finally {
+      await p.close();
+    }
+  });
+});
+
+describe('configured public menu URL', () => {
+  it('is returned read-only exactly as deployed and cannot be changed through the API', async () => {
+    const p = await setup({ PUBLIC_MENU_URL: 'https://menu.example.com/' });
+    try {
+      await createAccount(p.db, 'root', 'rootpass1', 'super_admin');
+      const s = await login(p.app, 'root', 'rootpass1');
+      const res = await p.app.inject({ url: '/api/admin/foodcourt', headers: authed(s) });
+      expect(res.json().publicMenuUrl).toBe('https://menu.example.com/');
+      const put = await p.app.inject({
+        method: 'PUT', url: '/api/admin/foodcourt', headers: authed(s),
+        payload: { name: 'x', logo: null, menuOpen: true, closedMessage: '', publicMenuUrl: 'https://evil.example/' },
+      });
+      expectError(put, 400, 'VALIDATION_ERROR');
+      expect((await p.app.inject({ url: '/api/admin/foodcourt', headers: authed(s) })).json().publicMenuUrl).toBe('https://menu.example.com/');
     } finally {
       await p.close();
     }

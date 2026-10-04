@@ -149,12 +149,13 @@ export async function superRoutes(app: FastifyInstance) {
 
   // ---------- foodcourt categories (list is in stall-routes, readable by both roles) ----------
 
-  const categoryView = (x: CategoryDoc, n: number): AdminCategory => ({
+  const categoryView = (x: CategoryDoc, n: number, stalls = 0): AdminCategory => ({
     id: x._id.toHexString(),
     name: x.name,
     icon: x.icon as AdminCategory['icon'],
     sortOrder: x.sortOrder,
     foodCount: n,
+    stallCount: stalls,
   });
 
   app.post('/api/admin/categories', async (req, reply) => {
@@ -176,7 +177,8 @@ export async function superRoutes(app: FastifyInstance) {
     const cat = await findOr404(c.categories, { _id: oid(req.params.id) });
     const input = parse(GlobalCategoryInputSchema, req.body);
     await c.categories.updateOne({ _id: cat._id }, { $set: input });
-    return categoryView({ ...cat, ...input }, await c.foods.countDocuments({ categoryId: cat._id }));
+    const stalls = await c.foods.distinct('stallId', { categoryId: cat._id });
+    return categoryView({ ...cat, ...input }, await c.foods.countDocuments({ categoryId: cat._id }), stalls.length);
   });
 
   app.delete<{ Params: P }>('/api/admin/categories/:id', async (req, reply) => {

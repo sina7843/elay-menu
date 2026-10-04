@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // Wraps every customer route. Global states win over the page: menu closed by the super admin,
 // first load (skeleton), first-load failure (retry). The order bar shows only on a usable menu.
-import { ref } from 'vue';
+import { ref, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import CustHeader from './components/CustHeader.vue';
 import MenuSkeleton from './components/MenuSkeleton.vue';
@@ -10,6 +10,8 @@ import SearchField from './components/SearchField.vue';
 import { isClosed, menuState, retryMenu, startMenu } from './menu';
 
 startMenu();
+// Browser title follows the foodcourt name set by the super admin.
+watchEffect(() => (document.title = `منوی ${menuState.menu?.foodcourt.name ?? 'ال‌آی'}`));
 const route = useRoute();
 const router = useRouter();
 const text = ref('');

@@ -1,13 +1,49 @@
+# Build context = repository root. Images only need package manifests, the lockfile and the sources
+# of packages/shared, apps/api (incl. seed-assets) and apps/web (incl. runtime fonts/icons/logos).
 **/node_modules
 **/dist
 **/coverage
+**/test-results
+**/playwright-report
+**/e2e
+apps/api/test
+apps/api/data
+**/*.test.ts
+**/*.spec.ts
+**/vitest.config.ts
+**/playwright.config.ts
 .git
+.github
+.vscode
+.idea
+
+# Secrets and local configuration
 .env
 .env.*
 !.env.example
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+secrets
+
+# Instructions, prompts and design reference material (never shipped)
 handoff
 prompts
 tools
 .claude
 .dragon-backups
+.dragon-current-prompt.txt
+CLAUDE.md
+Requirements.md
+IMPLEMENTATION_DECISIONS.md
+PROJECT_STATUS.md
+IMPLEMENTATION_STATUS.md
+DECISIONS.md
+REQUIREMENTS_TRACEABILITY.md
+README_START_HERE_FA.md
+PACKAGE_VALIDATION.txt
+VERSION.txt
+0[1-6]-*.cmd
+docs
 *.log

@@ -172,3 +172,5 @@ select.ad-time {
 /* Captions of grouped controls (swatches, category picker) use the label look without a <label>. */
 .ad-field-label { font-size: 13px; font-weight: 800; }
 .ad-field-label i { font-style: normal; color: var(--accent); }
+/* Temporary passwords are read and retyped: show real Latin digits (Rokh FaNum draws them as Persian). */
+.ad-cred code { font-family: ui-monospace, Consolas, 'Courier New', monospace; letter-spacing: 1px; }

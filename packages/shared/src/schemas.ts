@@ -323,6 +323,8 @@ export const AdminCategorySchema = z.strictObject({
   icon: CategoryIconSchema,
   sortOrder: z.number().int(),
   foodCount: z.number().int(),
+  /** Distinct stalls with foods in this category («۱۸ غذا از ۳ غرفه»). */
+  stallCount: z.number().int(),
 });
 
 export const AdminStallCategorySchema = z.strictObject({

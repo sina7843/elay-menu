@@ -6,7 +6,10 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import ElIcon from '../../components/ElIcon.vue';
 import ModalLayer from '../../customer/components/ModalLayer.vue';
 
-const props = defineProps<{ file: File }>();
+const props = withDefaults(defineProps<{ file: File; outputType?: 'image/webp' | 'image/png'; minSide?: number }>(), {
+  outputType: 'image/webp',
+  minSide: 256,
+});
 const emit = defineEmits<{ done: [Blob]; cancel: []; another: [] }>();
 
 const INSET = 28;
@@ -98,12 +101,12 @@ async function use() {
   const left = size.value / 2 + offset.value.x - (nat.value.w * scale.value) / 2;
   const top = size.value / 2 + offset.value.y - (nat.value.h * scale.value) / 2;
   const src = frame.value / scale.value; // side of the cropped square in source pixels
-  const out = Math.round(Math.min(1024, Math.max(256, src)));
+  const out = Math.round(Math.min(1024, Math.max(props.minSide, src)));
   const canvas = document.createElement('canvas');
   canvas.width = out;
   canvas.height = out;
   canvas.getContext('2d')!.drawImage(img, (INSET - left) / scale.value, (INSET - top) / scale.value, src, src, 0, 0, out, out);
-  const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, 'image/webp', 0.9));
+  const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, props.outputType, 0.9));
   busy.value = false;
   if (blob) emit('done', blob);
 }

@@ -19,7 +19,7 @@ function back() {
 
 <template>
   <header class="el-header">
-    <img class="el-header__logo" :src="logoUrl" alt="ال‌آی" />
+    <img class="el-header__logo" :src="menuState.menu?.foodcourt.logoUrl ?? logoUrl" :alt="menuState.menu?.foodcourt.name ?? 'ال‌آی'" />
     <span class="el-header__title">{{ title }}</span>
     <RouterLink v-if="action === 'order'" class="el-header__action" to="/order" :aria-label="`لیست سفارش، ${fa(itemCount)} مورد`">
       <ElIcon name="list" />

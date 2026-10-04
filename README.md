@@ -4,7 +4,7 @@ Mobile web menu for the Elay food court, with a stall-admin panel and a super-ad
 Persian, right-to-left, light theme only. The app takes no orders and no payments: the order list stays
 on the customer's phone and is read aloud to each stall's cashier.
 
-Status: DRAGON-03. The customer menu and the stall-admin panel (/admin/stall) are complete on live API data. The super-admin screens arrive in DRAGON-04; their API is ready (see `docs/api.md`).
+Status: release candidate. Customer menu (`/`), stall-admin panel (`/admin/stall`) and super-admin panel (`/admin/super`) are complete on live API data. Deployment needs the real printed-QR URL and a TLS front end — see [docs/deployment.md](docs/deployment.md).
 
 ## Layout
 
@@ -14,6 +14,8 @@ Status: DRAGON-03. The customer menu and the stall-admin panel (/admin/stall) ar
 | `apps/api` | Fastify + TypeScript + MongoDB driver. Auth, guards, migrations, demo seed, CLI commands. |
 | `packages/shared` | zod schemas, error format and the discount rule shared by both apps. |
 | `docs/api.md` | Endpoint contract, error format, security model. |
+| `docs/deployment.md` | Configure, build, first admin, TLS/reverse proxy, health, backup, update and rollback. |
+| `docs/coverage.md` | Every handoff screen, component and rule mapped to source, route and tests. |
 
 The ignored `handoff/` folder is reference material only; nothing at build or run time reads it.
 
@@ -64,4 +66,5 @@ design review: `SCREEN_DIR=<folder> npm run screens -w @elay/web`.
 
 There is no signup and no default password. The first super admin is created with the interactive
 command above (it refuses to run when a super admin already exists). Stall admin accounts and
-temporary passwords are managed by the super admin (DRAGON-04).
+temporary passwords are managed by the super admin in SA-StallForm; each temporary password is shown once,
+and «رمز تازه» invalidates the old password and signs the manager out everywhere.

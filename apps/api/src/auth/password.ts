@@ -7,9 +7,16 @@ const R = 8;
 const P = 1;
 const KEYLEN = 32;
 
+/**
+ * Persian/Arabic-Indic digits count as ASCII digits: Rokh FaNum shows ASCII digits as Persian glyphs, so a
+ * manager reading a temporary password may type either. Applied identically when hashing and verifying.
+ */
+const canonical = (password: string) =>
+  password.normalize('NFC').replace(/[۰-۹٠-٩]/g, (d) => String(d.charCodeAt(0) & 0xf));
+
 function derive(password: string, salt: Buffer, n: number, r: number, p: number): Promise<Buffer> {
   return new Promise((resolve, reject) =>
-    scrypt(password.normalize('NFC'), salt, KEYLEN, { N: n, r, p, maxmem: 256 * n * r }, (err, key) =>
+    scrypt(canonical(password), salt, KEYLEN, { N: n, r, p, maxmem: 256 * n * r }, (err, key) =>
       err ? reject(err) : resolve(key),
     ),
   );

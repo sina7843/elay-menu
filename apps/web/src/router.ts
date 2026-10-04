@@ -51,7 +51,18 @@ export const router = createRouter({
         { path: 'account', component: () => import('./admin/stall/AccountView.vue') },
       ],
     },
-    { path: '/admin/super', component: () => import('./views/AdminShell.vue'), meta: { role: 'super_admin' } },
+    {
+      path: '/admin/super',
+      component: () => import('./admin/super/SuperLayout.vue'),
+      meta: { role: 'super_admin' },
+      children: [
+        { path: '', component: () => import('./admin/super/StallsView.vue') },
+        { path: 'stalls/new', component: () => import('./admin/super/StallFormView.vue'), meta: { form: true } },
+        { path: 'stalls/:id', component: () => import('./admin/super/StallFormView.vue'), props: true, meta: { form: true } },
+        { path: 'categories', component: () => import('./admin/super/CategoriesView.vue') },
+        { path: 'settings', component: () => import('./admin/super/SettingsView.vue') },
+      ],
+    },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 });
@@ -67,4 +78,5 @@ router.beforeEach(async (to) => {
 });
 
 // Session expired or revoked (e.g. password reset by the super admin): back to the shared login.
-setSessionLostHandler(() => void router.replace('/admin/login'));
+// Full page load so no panel data from the lost session stays in memory.
+setSessionLostHandler(() => window.location.assign('/admin/login'));

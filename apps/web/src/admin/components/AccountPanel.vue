@@ -2,18 +2,17 @@
 // AccountMenu (Admin-Account; reused by the super-admin settings): username, change password
 // (current / new / confirm — save stays disabled until they match), forgotten-password guidance, logout.
 import { computed, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { ChangePasswordInputSchema } from '@elay/shared';
 import ElIcon from '../../components/ElIcon.vue';
 import { ApiRequestError, account, api, logout } from '../../api';
 import { failedToast, showToast } from '../toast';
 
-const props = defineProps<{ logoUrl?: string | null; subtitle: string; forgotHint?: string }>();
-const router = useRouter();
+const props = defineProps<{ logoUrl?: string | null; subtitle?: string; forgotHint?: string; compact?: boolean }>();
 const form = reactive({ currentPassword: '', newPassword: '', confirmPassword: '' });
 const errors = reactive<Record<string, string>>({});
 const busy = ref(false);
 const leaving = ref(false);
+const open = ref(!props.compact); // compact (SA-Settings): «تغییر رمز» row expands the form
 
 const mismatch = computed(() => !!form.confirmPassword && form.confirmPassword !== form.newPassword);
 const ready = computed(() => !!form.currentPassword && !!form.newPassword && form.confirmPassword === form.newPassword);
@@ -45,24 +44,30 @@ async function signOut() {
   leaving.value = true;
   try {
     await logout();
-    await router.replace('/admin/login');
+    // Full page load: no panel data (stalls, credentials, foods) survives in memory after sign-out.
+    window.location.assign('/admin/login');
   } catch {
     failedToast('خروج انجام نشد. اتصال را بررسی کنید و دوباره امتحان کنید.');
   } finally {
     leaving.value = false;
   }
 }
-void props;
 </script>
 
 <template>
-  <div class="ad-profile mt-4">
+  <div v-if="!compact" class="ad-profile mt-4">
     <span class="ad-top__logo" style="width: 48px; height: 48px"><img v-if="logoUrl" :src="logoUrl" alt="" /></span>
     <span class="ad-profile__body"><b dir="ltr" style="text-align: right">{{ account?.username }}</b><span>{{ subtitle }}</span></span>
   </div>
 
-  <form class="ad-section" novalidate @submit.prevent="save">
-    <h2>تغییر رمز</h2>
+  <div v-if="compact" class="ad-menu-row">
+    <ElIcon name="user" />نام کاربری<span class="ad-menu-row__end" dir="ltr">{{ account?.username }}</span>
+  </div>
+  <button v-if="compact" type="button" class="ad-menu-row" :aria-expanded="open" aria-controls="pw-form" @click="open = !open">
+    <ElIcon name="key" />تغییر رمز<span class="ad-menu-row__end"><ElIcon :name="open ? 'chevron-down' : 'chevron-forward'" /></span>
+  </button>
+  <form v-if="open" id="pw-form" class="ad-section" novalidate @submit.prevent="save">
+    <h2 v-if="!compact">تغییر رمز</h2>
     <input type="text" name="username" autocomplete="username" :value="account?.username" class="visually-hidden" tabindex="-1" aria-hidden="true" />
     <div class="ad-field">
       <label for="pw-current">رمز فعلی</label>
@@ -92,7 +97,7 @@ void props;
     <p id="pw-hint" class="ad-hint mt-2"><span>تا دو رمز یکی نشوند دکمه غیرفعال می‌ماند.</span></p>
   </form>
 
-  <section style="padding-top: 8px">
+  <section :style="compact ? undefined : 'padding-top: 8px'">
     <div v-if="forgotHint" class="ad-menu-row" role="note">
       <ElIcon name="info" />رمز را فراموش کرده‌اید؟<span class="ad-menu-row__end">{{ forgotHint }}</span>
     </div>

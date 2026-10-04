@@ -32,7 +32,8 @@ async function reset() {
 }
 await reset();
 
-const config = loadConfig({ NODE_ENV: 'test', MONGODB_URI: mem.getUri(), MEDIA_DIR: mediaDir, COOKIE_SECURE: 'false' });
+// Many sign-ins per test run from one address: the login limit itself is covered by the API tests.
+const config = loadConfig({ NODE_ENV: 'test', MONGODB_URI: mem.getUri(), MEDIA_DIR: mediaDir, COOKIE_SECURE: 'false', LOGIN_RATE_LIMIT_PER_15M: '1000' });
 const app = await buildApp(config, db, false, () => clock.now);
 await app.listen({ host: '127.0.0.1', port: API_PORT });
 

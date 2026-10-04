@@ -189,14 +189,18 @@ export async function stallRoutes(app: FastifyInstance) {
 
   app.get('/api/admin/categories', async (req) => {
     await requireAccount(req);
-    const counts = await countFoods(ctx, 'categoryId');
+    const rows = await c.foods
+      .aggregate<{ _id: ObjectId; n: number; stalls: ObjectId[] }>([{ $group: { _id: '$categoryId', n: { $sum: 1 }, stalls: { $addToSet: '$stallId' } } }])
+      .toArray();
+    const counts = new Map(rows.map((r) => [r._id.toHexString(), r]));
     const list = await c.categories.find().sort({ sortOrder: 1, _id: 1 }).toArray();
     return list.map((x) => ({
       id: x._id.toHexString(),
       name: x.name,
       icon: x.icon,
       sortOrder: x.sortOrder,
-      foodCount: counts.get(x._id.toHexString()) ?? 0,
+      foodCount: counts.get(x._id.toHexString())?.n ?? 0,
+      stallCount: counts.get(x._id.toHexString())?.stalls.length ?? 0,
     }));
   });
 }

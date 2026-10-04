@@ -137,3 +137,30 @@ test('capture stall-admin screens', async ({ page }) => {
   await page.getByLabel('تکرار رمز تازه').fill('newpass12');
   await shot(page, 'Admin-Account');
 });
+
+test('capture super-admin screens', async ({ page }) => {
+  test.setTimeout(120_000);
+  await control({ op: 'reset' });
+  for (const [stall, u] of [['cheezo', 'cheezo'], ['blu-burger', 'blu'], ['grill-up', 'grillup'], ['khoroos', 'khoroos'], ['harmony', 'harmony'], ['dokhan-dokan', 'dokhan'], ['hayat', 'hayat']]) {
+    await control({ op: 'stallAdmin', stall, username: u, password: `${u}12345` });
+  }
+  await control({ op: 'superAdmin', username: 'root', password: 'rootpass1' });
+  await page.goto('/admin/login');
+  await page.getByLabel('نام کاربری').fill('root');
+  await page.getByLabel('رمز عبور').fill('rootpass1');
+  await page.getByRole('button', { name: 'ورود' }).click();
+  await page.waitForSelector('.ad-stall-card');
+  await shot(page, 'SA-Stalls', false);
+  await page.locator('.ad-stall-card').first().click();
+  await page.getByRole('button', { name: 'رمز تازه' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: 'رمز تازه' }).click();
+  await page.waitForSelector('.ad-cred code');
+  await shot(page, 'SA-StallForm');
+  await page.goto('/admin/super/categories');
+  await page.waitForSelector('.ad-list-row');
+  await page.getByLabel('نام دسته').fill('نوشیدنی');
+  await shot(page, 'SA-Categories');
+  await page.goto('/admin/super/settings');
+  await page.waitForSelector('.ad-readonly');
+  await shot(page, 'SA-Settings');
+});

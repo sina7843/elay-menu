@@ -40,7 +40,8 @@ const current = (t: (typeof tabs)[number]) => (t.exact ? route.path === t.to : r
     <span class="el-skel el-skel--title" style="width: 40%"></span>
     <span v-for="i in 4" :key="i" class="el-skel el-skel--line mt-4" style="display: block; width: 90%"></span>
   </div>
-  <RouterView v-else />
+  <!-- Keyed so moving between /new and /:id (or two ids) remounts the form with fresh state. -->
+  <RouterView v-else :key="route.path" />
 
   <AdminToast />
   <nav v-if="!route.meta.form" class="ad-tabbar" aria-label="بخش‌های پنل" style="grid-template-columns: repeat(4, minmax(0, 1fr))">
