@@ -1,0 +1,57 @@
+# dependencies and build output
+node_modules/
+dist/
+build/
+coverage/
+.playwright/
+test-results/
+
+# local environment and secrets
+.env
+.env.*
+!.env.example
+!*.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+
+# local Claude state
+.claude/settings.local.json
+.claude/agent-memory-local/
+
+# editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# generated prompt clipboard backup
+.dragon-current-prompt.txt
+
+# local recovery artifacts
+.dragon-backups/
+
+# Local AI instructions and original design handoff; runtime assets are copied into apps/
+/.claude/
+/prompts/
+/tools/
+/handoff/
+/CLAUDE.md
+/Requirements.md
+/IMPLEMENTATION_DECISIONS.md
+/PROJECT_STATUS.md
+/IMPLEMENTATION_STATUS.md
+/DECISIONS.md
+/REQUIREMENTS_TRACEABILITY.md
+/README_START_HERE_FA.md
+/PACKAGE_VALIDATION.txt
+/VERSION.txt
+/0[1-6]-*.cmd
