@@ -24,6 +24,8 @@ export interface StallDoc {
   visible: boolean;
   isDemo: boolean;
   seedKey?: string;
+  /** Set first when a cascade delete starts; such stalls are invisible everywhere and the delete is resumable. */
+  deleting?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -94,6 +96,15 @@ export interface PopularityCounterDoc {
   expiresAt: Date;
 }
 
+/** Uploaded file record. Seeded demo files (demo-*) have no record. */
+export interface MediaDoc {
+  _id: string;
+  kind: 'food' | 'stall-logo' | 'foodcourt-logo';
+  /** Owning stall for food images; null for logos (attached by the super admin). */
+  stallId: ObjectId | null;
+  createdAt: Date;
+}
+
 export function collections(db: Db) {
   return {
     foodcourt: db.collection<FoodcourtDoc>('foodcourt'),
@@ -104,6 +115,7 @@ export function collections(db: Db) {
     stallCategories: db.collection<StallCategoryDoc>('stallCategories'),
     foods: db.collection<FoodDoc>('foods'),
     popularityCounters: db.collection<PopularityCounterDoc>('popularityCounters'),
+    media: db.collection<MediaDoc>('media'),
   };
 }
 export type Collections = ReturnType<typeof collections>;
@@ -151,6 +163,16 @@ const MIGRATIONS: { id: string; up: (db: Db) => Promise<void> }[] = [
         { $setOnInsert: { name: 'ال‌آی', logo: null, menuOpen: true, closedMessage: '', updatedAt: new Date() } },
         { upsert: true },
       );
+    },
+  },
+  {
+    id: '003-media-and-lookups',
+    up: async (db) => {
+      const c = collections(db);
+      await c.media.createIndex({ createdAt: 1 });
+      await c.media.createIndex({ stallId: 1 });
+      await c.foods.createIndex({ image: 1 });
+      await c.stalls.createIndex({ deleting: 1 }, { sparse: true });
     },
   },
 ];

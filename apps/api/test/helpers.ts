@@ -18,7 +18,7 @@ export interface TestEnv {
 }
 
 /** Fresh database per suite: in-memory mongod, or MONGODB_TEST_URI when provided (e.g. CI with a mongo service). */
-export async function setup(env: Record<string, string> = {}): Promise<TestEnv> {
+export async function setup(env: Record<string, string> = {}, clock?: { now: Date }): Promise<TestEnv> {
   const mem = process.env.MONGODB_TEST_URI ? null : await MongoMemoryServer.create();
   const base = process.env.MONGODB_TEST_URI ?? mem!.getUri();
   const client = await MongoClient.connect(base);
@@ -30,7 +30,7 @@ export async function setup(env: Record<string, string> = {}): Promise<TestEnv> 
     MEDIA_DIR: await mkdtemp(path.join(os.tmpdir(), 'elay-media-')),
     ...env,
   });
-  const app = await buildApp(config, db, false);
+  const app = await buildApp(config, db, false, clock ? () => clock.now : undefined);
   return {
     app,
     db,

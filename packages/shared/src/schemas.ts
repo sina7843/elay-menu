@@ -43,11 +43,11 @@ export const CategoryIconSchema = z.enum(CATEGORY_ICON_KEYS);
 export const FOOD_TINTS = ['food-tint-1', 'food-tint-2', 'food-tint-3', 'food-tint-4'] as const;
 export const FoodTintSchema = z.enum(FOOD_TINTS);
 
-export const SortOrderSchema = z.number().int().min(0).max(10_000);
 export const PriceSchema = z.number().int().min(0).max(MAX_PRICE_TOMAN);
 
 /** Tehran local calendar date, ISO formatted (YYYY-MM-DD, Gregorian). The UI converts to/from Jalali. */
 export const LocalDateSchema = z.iso.date();
+const Instant = z.iso.datetime({ offset: true });
 
 // ---------- schedule ----------
 
@@ -68,17 +68,19 @@ export const DayScheduleSchema = z
 export const WeeklyScheduleSchema = z.array(DayScheduleSchema).length(7);
 export type WeeklySchedule = z.infer<typeof WeeklyScheduleSchema>;
 
-/**
- * Manual open/closed override from the stall panel. `until` is the start of the next scheduled
- * opening interval (computed server-side); null when no future opening exists, in which case the
- * override persists until changed.
- */
+export const DEFAULT_WEEKLY_HOURS: WeeklySchedule = Array.from({ length: 7 }, () => ({
+  closed: false,
+  open: '12:00',
+  close: '23:00',
+}));
+
+/** Manual open/closed override; `until` = next scheduled opening start, null when none exists. */
 export const ManualOverrideSchema = z.strictObject({
   state: z.enum(['open', 'closed']),
-  until: z.iso.datetime({ offset: true }).nullable(),
+  until: Instant.nullable(),
 });
 
-// ---------- entities (write inputs) ----------
+// ---------- write inputs ----------
 
 export const FoodcourtInputSchema = z.strictObject({
   name: text(60),
@@ -87,25 +89,42 @@ export const FoodcourtInputSchema = z.strictObject({
   closedMessage: text(200, 0),
 });
 
-export const StallInputSchema = z.strictObject({
+/** Super admin: create a stall together with its stall-admin account. */
+export const StallCreateInputSchema = z.strictObject({
   name: text(40),
-  intro: text(40, 0),
   logo: MediaNameSchema.nullable(),
-  weeklyHours: WeeklyScheduleSchema,
-  manualOverride: ManualOverrideSchema.nullable(),
-  sortOrder: SortOrderSchema,
+  visible: z.boolean(),
+  adminUsername: UsernameSchema,
+});
+
+/** Super admin: stall identity and menu visibility. */
+export const StallUpdateInputSchema = z.strictObject({
+  name: text(40),
+  logo: MediaNameSchema.nullable(),
   visible: z.boolean(),
 });
+
+/** Stall panel: short intro and weekly hours. */
+export const StallProfileInputSchema = z.strictObject({
+  intro: text(40, 0),
+  weeklyHours: WeeklyScheduleSchema,
+});
+
+/** Stall panel "open now" switch. */
+export const ManualStatusInputSchema = z.strictObject({ isOpen: z.boolean() });
+
+export const AccountUsernameInputSchema = z.strictObject({ username: UsernameSchema });
 
 export const GlobalCategoryInputSchema = z.strictObject({
   name: text(30),
   icon: CategoryIconSchema,
-  sortOrder: SortOrderSchema,
 });
 
-export const StallCategoryInputSchema = z.strictObject({
-  name: text(40),
-  sortOrder: SortOrderSchema,
+export const StallCategoryInputSchema = z.strictObject({ name: text(40) });
+
+/** Full new order; must contain exactly the existing ids. */
+export const ReorderInputSchema = z.strictObject({
+  ids: z.array(ObjectIdSchema).max(500).refine((ids) => new Set(ids).size === ids.length, 'شناسه‌ی تکراری.'),
 });
 
 export const DiscountSchema = z
@@ -128,8 +147,35 @@ export const FoodInputSchema = z.strictObject({
   discount: DiscountSchema.nullable(),
 });
 
+export const AvailabilityInputSchema = z.strictObject({ available: z.boolean() });
+
 /** Anonymous popularity event: one successful "+" (add or quantity increment) for a food. */
 export const PopularityEventSchema = z.strictObject({ foodId: ObjectIdSchema });
+
+const flag = z.enum(['true', 'false']).transform((v) => v === 'true');
+
+const tomanParam = z
+  .string()
+  .regex(/^\d{1,10}$/)
+  .transform(Number);
+
+/** Customer search/filter query string (FilterSheet + StallFilterChip + category page). */
+export const SearchQuerySchema = z
+  .strictObject({
+  q: z.string().max(100).optional(),
+  stallId: ObjectIdSchema.optional(),
+  categoryId: ObjectIdSchema.optional(),
+  onlyOpen: flag.optional(),
+  onlyDiscounted: flag.optional(),
+  /** Inclusive bounds on the price the customer pays today. */
+  minPrice: tomanParam.optional(),
+  maxPrice: tomanParam.optional(),
+  sort: z.enum(['default', 'cheapest', 'priciest', 'popular']).optional(),
+  })
+  .refine((q) => q.minPrice === undefined || q.maxPrice === undefined || q.minPrice <= q.maxPrice, {
+    message: 'بازه‌ی قیمت نامعتبر است.',
+    path: ['maxPrice'],
+  });
 
 // ---------- auth ----------
 
@@ -162,6 +208,14 @@ export const SessionResponseSchema = z.strictObject({
 });
 export type SessionResponse = z.infer<typeof SessionResponseSchema>;
 
+/** Returned once by stall creation and password reset; never retrievable again. */
+export const TemporaryPasswordResponseSchema = z.strictObject({
+  username: z.string(),
+  temporaryPassword: z.string(),
+});
+
+export const MediaUploadResponseSchema = z.strictObject({ name: MediaNameSchema, url: z.string() });
+
 const url = z.string(); // relative media URL such as /api/media/<name>
 
 export const PublicFoodcourtSchema = z.strictObject({
@@ -178,8 +232,9 @@ export const PublicStallSchema = z.strictObject({
   logoUrl: url.nullable(),
   isOpen: z.boolean(),
   /** Start of the next opening, when closed and one exists. */
-  opensAt: z.iso.datetime({ offset: true }).nullable(),
+  opensAt: Instant.nullable(),
   sortOrder: z.number().int(),
+  foodCount: z.number().int(),
 });
 
 export const PublicCategorySchema = z.strictObject({
@@ -187,6 +242,8 @@ export const PublicCategorySchema = z.strictObject({
   name: z.string(),
   icon: CategoryIconSchema,
   sortOrder: z.number().int(),
+  /** Foods of visible stalls in this category (sold-out included). */
+  foodCount: z.number().int(),
 });
 
 export const PublicStallCategorySchema = z.strictObject({
@@ -204,12 +261,34 @@ export const PublicFoodSchema = z.strictObject({
   name: z.string(),
   description: z.string(),
   price: PriceSchema,
-  /** Equals price unless a discount is active today. */
+  /** Equals price unless a discount is active today (Tehran). */
   finalPrice: PriceSchema,
   discountPercent: z.number().int().nullable(),
   imageUrl: url.nullable(),
   tint: FoodTintSchema,
   available: z.boolean(),
+});
+
+/**
+ * Whole customer menu in one response (also the offline cache unit). When the menu is closed
+ * only `foodcourt` is filled and every list is empty.
+ */
+export const PublicMenuSchema = z.strictObject({
+  foodcourt: PublicFoodcourtSchema,
+  categories: z.array(PublicCategorySchema),
+  stalls: z.array(PublicStallSchema),
+  stallCategories: z.array(PublicStallCategorySchema),
+  foods: z.array(PublicFoodSchema),
+  /** «تخفیف امروز»: available foods with a discount active today, in menu order. */
+  dealIds: z.array(ObjectIdSchema),
+  /** «پرطرفدارها»: up to five available foods, rank order (7-day adds, ties by id). */
+  popularIds: z.array(ObjectIdSchema).max(5),
+  generatedAt: Instant,
+});
+
+export const PublicSearchResponseSchema = z.strictObject({
+  stalls: z.array(PublicStallSchema),
+  foods: z.array(PublicFoodSchema),
 });
 
 export const AdminFoodcourtSchema = FoodcourtInputSchema.extend({
@@ -218,16 +297,45 @@ export const AdminFoodcourtSchema = FoodcourtInputSchema.extend({
   publicMenuUrl: z.string().nullable(),
 });
 
-export const AdminStallSchema = StallInputSchema.extend({
+export const AdminStallSchema = z.strictObject({
   id: ObjectIdSchema,
+  name: z.string(),
+  intro: z.string(),
+  logo: MediaNameSchema.nullable(),
   logoUrl: url.nullable(),
+  weeklyHours: WeeklyScheduleSchema,
+  manualOverride: ManualOverrideSchema.nullable(),
+  isOpen: z.boolean(),
+  opensAt: Instant.nullable(),
+  sortOrder: z.number().int(),
+  visible: z.boolean(),
   isDemo: z.boolean(),
+  foodCount: z.number().int(),
+  adminUsername: z.string().nullable(),
+});
+
+export const AdminCategorySchema = z.strictObject({
+  id: ObjectIdSchema,
+  name: z.string(),
+  icon: CategoryIconSchema,
+  sortOrder: z.number().int(),
+  foodCount: z.number().int(),
+});
+
+export const AdminStallCategorySchema = z.strictObject({
+  id: ObjectIdSchema,
+  stallId: ObjectIdSchema,
+  name: z.string(),
+  sortOrder: z.number().int(),
+  foodCount: z.number().int(),
 });
 
 export const AdminFoodSchema = FoodInputSchema.extend({
   id: ObjectIdSchema,
   stallId: ObjectIdSchema,
   imageUrl: url.nullable(),
+  finalPrice: PriceSchema,
+  discountActive: z.boolean(),
 });
 
 export type PublicFoodcourt = z.infer<typeof PublicFoodcourtSchema>;
@@ -235,6 +343,13 @@ export type PublicStall = z.infer<typeof PublicStallSchema>;
 export type PublicCategory = z.infer<typeof PublicCategorySchema>;
 export type PublicStallCategory = z.infer<typeof PublicStallCategorySchema>;
 export type PublicFood = z.infer<typeof PublicFoodSchema>;
+export type PublicMenu = z.infer<typeof PublicMenuSchema>;
+export type PublicSearchResponse = z.infer<typeof PublicSearchResponseSchema>;
+export type SearchQuery = z.infer<typeof SearchQuerySchema>;
 export type AdminFoodcourt = z.infer<typeof AdminFoodcourtSchema>;
 export type AdminStall = z.infer<typeof AdminStallSchema>;
+export type AdminCategory = z.infer<typeof AdminCategorySchema>;
+export type AdminStallCategory = z.infer<typeof AdminStallCategorySchema>;
 export type AdminFood = z.infer<typeof AdminFoodSchema>;
+export type FoodInput = z.infer<typeof FoodInputSchema>;
+export type TemporaryPasswordResponse = z.infer<typeof TemporaryPasswordResponseSchema>;
