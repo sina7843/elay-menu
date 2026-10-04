@@ -14,6 +14,45 @@ Nothing here publishes the app, changes DNS or generates QR codes.
 Images contain only built code, runtime fonts/icons/logos and the demo seed images. Prompts, instructions,
 reference screenshots, tests and secrets are excluded by `.dockerignore`.
 
+## Coolify
+
+| Setting | Value |
+| --- | --- |
+| Resource type | Docker Compose (from the Git repository) |
+| Compose file | `compose.coolify.yaml` |
+| Public service | `web` — the only service that gets a domain |
+| Internal port | `8080` |
+
+Give `web` the menu domain with port 8080 (for example `https://DOMAIN:8080` in Coolify's domain field, which
+routes HTTPS on 443 to the container's 8080). Do not create a separate domain or route for `/api`, `api` or
+`mongo`: nginx inside `web` proxies `/api` to the API on the internal network.
+
+```
+Browser → https://DOMAIN → web:8080 (nginx) → /api proxy → api:3000 → mongo:27017
+```
+
+Environment variables (Coolify → Environment Variables; see `coolify.env.example`):
+
+| Variable | Value |
+| --- | --- |
+| `PUBLIC_MENU_URL` | `https://DOMAIN` — required, deployment fails without it. Must equal the URL on the printed QR codes. |
+| `COOKIE_SECURE` | `true` (keep) |
+| `SESSION_TTL_HOURS` | `12` (optional) |
+| `LOGIN_RATE_LIMIT_PER_15M` | `10` (optional) |
+
+Everything else is fixed in `compose.coolify.yaml`. No host ports are published; Coolify's proxy reaches `web`
+on the internal network and its forwarded client address is trusted by nginx (private-range rule).
+
+- **Migrations** run automatically when the API starts; there is no separate migrate step.
+- **First super admin** (once): open a terminal for the `api` container in Coolify (or `docker exec -it
+  <api-container> sh` on the server) and run `node dist/cli/create-super-admin.js`. There is no default account
+  and no admin credential in any environment variable.
+- **Data** lives in the fixed-name volumes `elay_mongo_data` (database) and `elay_media_data` (uploaded
+  photos and logos). Redeployments reuse them. **Production backups must include both volumes** — use the
+  backup and restore commands in section 6 with these volume names. Never delete them on redeploy.
+
+The rest of this guide describes a manual Docker Compose host using `compose.yaml`.
+
 ## 1. Configure
 
 Copy `.env.example` to `.env` next to `compose.yaml` (on Windows: `06-CREATE-LOCAL-ENV.cmd`) and set:
