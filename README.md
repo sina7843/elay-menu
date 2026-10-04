@@ -24,6 +24,7 @@ The ignored `handoff/` folder is reference material only; nothing at build or ru
 ```sh
 docker compose up -d --build        # web on http://localhost:8080 (WEB_PORT to change)
 docker compose exec -it api node dist/cli/create-super-admin.js   # first super admin, interactive
+docker compose exec api node dist/cli/seed-categories.js   # the eight foodcourt categories
 docker compose exec api node dist/cli/seed-demo.js --allow-production-demo   # optional demo data
 ```
 

@@ -50,6 +50,20 @@ const preview = computed(() =>
 );
 const tile = computed(() => ({ id: props.id ?? '000000000000000000000000', name: form.name || 'غذا', imageUrl: form.imageUrl, tint: form.tint }));
 
+/** Price field groups digits by thousands while typing (۳۸۵۰۰۰ → ۳۸۵٬۰۰۰); the caret stays at the same digit. */
+function priceInput(e: Event) {
+  const el = e.target as HTMLInputElement;
+  const caret = el.selectionStart ?? el.value.length;
+  const digitsBefore = el.value.slice(0, caret).replace(/[^0-9۰-۹٠-٩]/g, '').length;
+  const digits = el.value.replace(/[^0-9۰-۹٠-٩]/g, '').slice(0, 10);
+  const n = parseInteger(digits);
+  form.price = n === null ? '' : fa(n);
+  el.value = form.price;
+  let pos = 0;
+  for (let seen = 0; pos < el.value.length && seen < digitsBefore; pos++) if (/[0-9۰-۹]/.test(el.value[pos]!)) seen++;
+  el.setSelectionRange(pos, pos);
+}
+
 // ---------- photo ----------
 function pick() {
   fileInput.value?.click();
@@ -241,11 +255,11 @@ const err = (k: string) => (errors[k] ? { 'aria-invalid': true as const, 'aria-d
         <div class="ad-input" :class="{ 'ad-input--error': errors.price }">
           <input
             id="f-price"
-            v-model="form.price"
+            :value="form.price"
             inputmode="numeric"
             placeholder="مثلاً ۳۵۰٬۰۰۰"
             v-bind="err('price')"
-            @blur="price !== null && (form.price = fa(price))"
+            @input="priceInput"
           /><span class="ad-input__suffix">تومان</span>
         </div>
         <span v-if="errors.price" id="err-price" class="ad-error">{{ errors.price }}</span>

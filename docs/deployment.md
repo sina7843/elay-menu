@@ -47,6 +47,9 @@ on the internal network and its forwarded client address is trusted by nginx (pr
 - **First super admin** (once): open a terminal for the `api` container in Coolify (or `docker exec -it
   <api-container> sh` on the server) and run `node dist/cli/create-super-admin.js`. There is no default account
   and no admin credential in any environment variable.
+- **Foodcourt categories** (once, optional): in the same terminal run `node dist/cli/seed-categories.js` to
+  install the eight categories (پیتزا، برگر، گریل و کباب، سوخاری، غذای ایرانی، قهوه، چای و دمنوش، دسر) with their
+  icons. Safe to re-run; categories already present or edited by the super admin are kept.
 - **Data** lives in the fixed-name volumes `elay_mongo_data` (database) and `elay_media_data` (uploaded
   photos and logos). Redeployments reuse them. **Production backups must include both volumes** — use the
   backup and restore commands in section 6 with these volume names. Never delete them on redeploy.
@@ -87,6 +90,12 @@ docker compose exec -it api node dist/cli/create-super-admin.js
 It asks for a username and a password (hidden; at least 8 characters with letters and digits) and refuses to
 run when a super admin already exists. There is no default account. Then sign in at `/admin/login`.
 Stall managers are created by the super admin (SA-StallForm), which shows each temporary password once.
+
+Install the food court's eight categories (real data, safe to re-run):
+
+```sh
+docker compose exec api node dist/cli/seed-categories.js
+```
 
 Optional demo data (labelled `isDemo`, seven stalls, eight categories, nine foods, no accounts) for a test
 installation only:

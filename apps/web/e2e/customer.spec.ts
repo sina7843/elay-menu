@@ -142,8 +142,8 @@ test('search: Persian normalisation, results, no-result state and stale response
   await page.getByRole('searchbox', { name: 'جست‌وجو' }).fill('كباب'); // Arabic kaf
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/search\?q=/);
-  await expect(page.locator('.el-food-row')).toHaveCount(1);
-  await expect(page.locator('.el-food-row__name')).toHaveText('کباب کوبیده');
+  // Dish name match plus the «گریل و کباب» category match.
+  await expect(page.locator('.el-food-row__name')).toHaveText(['میکس گریل دو نفره', 'کباب کوبیده']);
 
   // Make the first of two requests slower than the second: the newer query must win.
   let first = true;
@@ -187,8 +187,8 @@ test('filter sheet: live count, apply to results, keyboard and focus', async ({ 
   await sheet.getByRole('button', { name: 'نمایش ۴ غذا' }).click();
   await expect(page).toHaveURL(/deal=1/);
   await expect(page).toHaveURL(/sort=cheapest/);
-  // Cheapest first by the price paid today: 145,000 / 361,000 / 432,000 / 712,000.
-  await expect(page.locator('.el-food-row__name')).toHaveText(['باقلوا', 'پیتزا مخصوص چیزو', 'سوشی کالیفرنیا ۸ تکه', 'میکس گریل دو نفره']);
+  // Cheapest first by the price paid today: 126,000 / 145,000 / 361,000 / 712,000.
+  await expect(page.locator('.el-food-row__name')).toHaveText(['کاپوچینو', 'باقلوا', 'پیتزا مخصوص چیزو', 'میکس گریل دو نفره']);
 
   // Esc closes and returns focus to the opener.
   const again = page.getByRole('button', { name: /فیلتر/ });

@@ -14,12 +14,15 @@ type Icon = (typeof CATEGORY_ICON_KEYS)[number];
 const ICON_NAMES: Record<Icon, string> = {
   pizza: 'پیتزا',
   burger: 'برگر',
-  kebab: 'کباب',
+  kebab: 'گریل و کباب',
   'fried-chicken': 'سوخاری',
+  iranian: 'غذای ایرانی',
+  coffee: 'قهوه',
+  tea: 'چای و دمنوش',
+  dessert: 'دسر',
   steak: 'استیک',
   sushi: 'سوشی',
   sandwich: 'ساندویچ',
-  dessert: 'دسر',
 };
 
 const draft = reactive({ name: '', icon: null as Icon | null });

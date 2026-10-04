@@ -168,7 +168,7 @@ test('foodcourt categories: add with icon, rename/icon, keyboard reorder, used c
 
   await page.getByRole('button', { name: 'ویرایش نوشیدنی' }).click();
   await page.getByLabel('نام تازه‌ی نوشیدنی').fill('نوشیدنی سرد');
-  await page.locator('form.ad-list-row__body').getByRole('button', { name: 'سوشی' }).click();
+  await page.locator('form.ad-list-row__body').getByRole('button', { name: 'قهوه' }).click();
   await page.getByRole('button', { name: 'ذخیره', exact: true }).click();
   await expect(page.locator('.ad-list-row__body b').nth(7)).toHaveText('نوشیدنی سرد');
 

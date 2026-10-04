@@ -7,23 +7,13 @@ import { fileURLToPath } from 'node:url';
 import type { Db, ObjectId } from 'mongodb';
 import type { WeeklySchedule } from '@elay/shared';
 import { collections } from '../db.js';
+import { ensureCategories } from './categories.js';
 
 const ASSETS = fileURLToPath(new URL('../../seed-assets/', import.meta.url));
 
-const CATEGORIES = [
-  ['pizza', 'پیتزا'],
-  ['burger', 'برگر'],
-  ['kebab', 'کباب'],
-  ['fried-chicken', 'سوخاری'],
-  ['steak', 'استیک'],
-  ['sushi', 'سوشی'],
-  ['sandwich', 'ساندویچ'],
-  ['dessert', 'دسر'],
-] as const;
-
 const week = (open: string, close: string): WeeklySchedule => Array.from({ length: 7 }, () => ({ closed: false, open, close }));
 
-type DemoFood = [key: string, name: string, description: string, price: number, image: string, tint: number, category: string, discount?: number];
+type DemoFood = [key: string, name: string, description: string, price: number, image: string | null, tint: number, category: string, discount?: number];
 
 const STALLS: { key: string; name: string; intro: string; logo: string; hours: WeeklySchedule; sections: [string, DemoFood[]][] }[] = [
   {
@@ -39,7 +29,7 @@ const STALLS: { key: string; name: string; intro: string; logo: string; hours: W
   },
   {
     key: 'grill-up', name: 'گریل‌آپ', intro: 'استیک و گریل', logo: 'grill-up.png', hours: week('12:00', '23:00'),
-    sections: [['گریل', [['mix-grill', 'میکس گریل دو نفره', 'استیک، جوجه، سبزیجات گریل‌شده', 890_000, 'steak.webp', 3, 'steak', 20]]]],
+    sections: [['گریل', [['mix-grill', 'میکس گریل دو نفره', 'استیک، جوجه، سبزیجات گریل‌شده', 890_000, 'steak.webp', 3, 'kebab', 20]]]],
   },
   {
     key: 'khoroos', name: 'بروستد خروس', intro: 'بروستد و سوخاری', logo: 'khoroos.png', hours: week('11:30', '23:00'),
@@ -47,19 +37,19 @@ const STALLS: { key: string; name: string; intro: string; logo: string; hours: W
   },
   {
     // Overnight hours exercise the past-midnight schedule shape.
-    key: 'harmony', name: 'هارمونی', intro: 'سوشی و غذای آسیایی', logo: 'harmony.png', hours: week('18:00', '02:00'),
-    sections: [['سوشی', [['california', 'سوشی کالیفرنیا ۸ تکه', 'خرچنگ، آووکادو، خیار', 480_000, 'sushi.webp', 4, 'sushi', 10]]]],
+    key: 'harmony', name: 'هارمونی', intro: 'کافه و قهوه‌ی دمی', logo: 'harmony.png', hours: week('18:00', '02:00'),
+    sections: [['قهوه', [['cappuccino', 'کاپوچینو', 'اسپرسو دبل با شیر کف‌دار', 140_000, null, 4, 'coffee', 10]]]],
   },
   {
     key: 'dokhan-dokan', name: 'دوخان دکان', intro: 'کباب ایرانی و دسر', logo: 'dokhan-dokan.png', hours: week('12:00', '23:00'),
     sections: [
-      ['کباب', [['koobideh', 'کباب کوبیده', 'دو سیخ با برنج زعفرانی', 295_000, 'kebab.webp', 3, 'kebab']]],
+      ['کباب', [['koobideh', 'کباب کوبیده', 'دو سیخ با برنج زعفرانی', 295_000, 'kebab.webp', 3, 'iranian']]],
       ['دسر', [['baklava', 'باقلوا', 'باقلوای پسته‌ای', 170_000, 'baklava.webp', 1, 'dessert', 15]]],
     ],
   },
   {
-    key: 'hayat', name: 'حیاط', intro: 'ساندویچ و فست‌فود', logo: 'hayat.png', hours: week('11:00', '23:00'),
-    sections: [['ساندویچ', [['special', 'ساندویچ مخصوص حیاط', 'نان باگت، گوشت، پنیر، سبزیجات', 265_000, 'sandwich.webp', 1, 'sandwich']]]],
+    key: 'hayat', name: 'حیاط', intro: 'چای و دمنوش', logo: 'hayat.png', hours: week('11:00', '23:00'),
+    sections: [['دمنوش', [['special', 'چای ماسالا', 'چای سیاه، دارچین، هل، شیر', 95_000, null, 1, 'tea']]]],
   },
 ];
 
@@ -83,10 +73,8 @@ export async function seedDemo(db: Db, mediaDir: string, now = new Date()) {
     return r!._id as ObjectId;
   };
 
-  const categoryIds = new Map<string, ObjectId>();
-  for (const [i, [icon, name]] of CATEGORIES.entries()) {
-    categoryIds.set(icon, await upsert('categories', `demo:category:${icon}`, { name, icon, sortOrder: i, isDemo: true }));
-  }
+  // Demo foods use the food court's real categories.
+  const categoryIds = await ensureCategories(db);
 
   const start = tehranDate(now);
   const end = tehranDate(new Date(now.getTime() + 30 * 86_400_000));
@@ -103,7 +91,7 @@ export async function seedDemo(db: Db, mediaDir: string, now = new Date()) {
       for (const [key, name, description, price, image, tint, category, percent] of items) {
         await upsert('foods', `demo:food:${s.key}:${key}`, {
           stallId, stallCategoryId, categoryId: categoryIds.get(category)!, name, description, price,
-          image: await copyMedia(mediaDir, 'food-samples', image), tint: `food-tint-${tint}`, available: true,
+          image: image ? await copyMedia(mediaDir, 'food-samples', image) : null, tint: `food-tint-${tint}`, available: true,
           discount: percent ? { percent, startDate: start, endDate: end } : null,
           isDemo: true, createdAt: now, updatedAt: now,
         });
@@ -111,5 +99,5 @@ export async function seedDemo(db: Db, mediaDir: string, now = new Date()) {
       }
     }
   }
-  return { categories: CATEGORIES.length, stalls: STALLS.length, foods };
+  return { categories: categoryIds.size, stalls: STALLS.length, foods };
 }

@@ -69,9 +69,9 @@ describe('public menu', () => {
     const m = await menu();
     expect(m.stalls.map((s) => s.name).sort()).toEqual(['پیتزا چیزو', 'گریل‌آپ', 'هارمونی', 'دوخان دکان'].sort());
     expect(m.foods).toHaveLength(6);
-    expect(m.categories.find((x) => x.icon === 'sandwich')!.foodCount).toBe(0);
+    expect(m.categories.find((x) => x.icon === 'tea')!.foodCount).toBe(0);
     expect(JSON.stringify(m)).not.toMatch(/حیاط|بروستد|بلو برگر/);
-    expect((await search('q=ساندویچ')).foods).toHaveLength(0);
+    expect((await search('q=چای')).foods).toHaveLength(0);
     const hidden = await food('demo:food:hayat:special');
     expect((await plus(hidden._id.toHexString())).statusCode).toBe(404);
   });
@@ -128,7 +128,7 @@ describe('popularity', () => {
 
   it('increment endpoint validates, refuses closed stalls and sold-out foods, and uses the Tehran day', async () => {
     const pizza = await food('demo:food:cheezo:pepperoni');
-    const sushi = await food('demo:food:harmony:california');
+    const sushi = await food('demo:food:harmony:cappuccino');
     expect((await plus(pizza._id.toHexString())).statusCode).toBe(204);
     expect((await plus(pizza._id.toHexString())).statusCode).toBe(204);
     expect((await c.popularityCounters.findOne({ foodId: pizza._id }))!).toMatchObject({ day: '2026-10-04', count: 2 });
@@ -159,17 +159,18 @@ describe('popularity', () => {
 
 describe('search', () => {
   it('normalises Persian letters and spans food, description, stall and category', async () => {
-    expect((await search('q=كباب')).foods.map((f) => f.name)).toEqual(['کباب کوبیده']);
+    // Matches the dish name and the «گریل و کباب» category name.
+    expect((await search('q=كباب')).foods.map((f) => f.name)).toEqual(['میکس گریل دو نفره', 'کباب کوبیده']);
     expect((await search('q=زعفرانی')).foods.map((f) => f.name)).toEqual(['کباب کوبیده']);
     const byStall = await search('q=چیزو');
     expect(byStall.stalls.map((s) => s.name)).toEqual(['پیتزا چیزو']);
     expect(byStall.foods).toHaveLength(2);
     expect((await search('q=سوخاری')).foods.map((f) => f.name)).toEqual(['بروستد چهار تکه']);
-    expect((await search(`q=${encodeURIComponent('سوشی ۸')}`)).foods).toHaveLength(1);
+    expect((await search(`q=${encodeURIComponent('کاپو')}`)).foods).toHaveLength(1);
   });
 
   it('filters by open stalls, discounts, price band, stall and category, and sorts', async () => {
-    expect((await search('onlyOpen=true')).foods.some((f) => f.name.includes('سوشی'))).toBe(false);
+    expect((await search('onlyOpen=true')).foods.some((f) => f.name.includes('کاپوچینو'))).toBe(false);
     expect((await search('onlyDiscounted=true')).foods).toHaveLength(4);
     const band = await search('minPrice=200000&maxPrice=400000');
     expect(band.foods.every((f) => f.finalPrice >= 200_000 && f.finalPrice <= 400_000)).toBe(true);

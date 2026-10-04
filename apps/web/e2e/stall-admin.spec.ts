@@ -79,7 +79,8 @@ test('first run: setup steps until the first food; category, photo crop/upload, 
   await page.getByLabel('نام غذا').fill('پیتزا پپرونی');
   await page.getByLabel('محتویات و توضیحات').fill('پپرونی و موتزارلا');
   await expect(page.getByText('۱۷ / ۱۲۰')).toBeVisible();
-  await page.getByLabel('قیمت').fill('۳۸۵٬۰۰۰');
+  await page.getByLabel('قیمت').pressSequentially('385000'); // grouped while typing
+  await expect(page.getByLabel('قیمت')).toHaveValue('۳۸۵٬۰۰۰');
   await page.getByRole('button', { name: 'پیتزا', exact: true }).click();
   await page.getByRole('button', { name: 'زمینه‌ی ۳' }).click();
   await page.getByRole('button', { name: 'افزودن به منو' }).click();

@@ -28,16 +28,33 @@ export const NewPasswordSchema = z
   .max(128, 'رمز طولانی است.')
   .refine((v) => /\p{L}/u.test(v) && /\p{Nd}/u.test(v), 'رمز باید حرف و عدد داشته باشد.');
 
+/** Foodcourt category icons. The first eight are the food court's categories; the last three stay valid for older data. */
 export const CATEGORY_ICON_KEYS = [
   'pizza',
   'burger',
   'kebab',
   'fried-chicken',
+  'iranian',
+  'coffee',
+  'tea',
+  'dessert',
   'steak',
   'sushi',
   'sandwich',
-  'dessert',
 ] as const;
+export type CategoryIcon = (typeof CATEGORY_ICON_KEYS)[number];
+
+/** The food court's categories, in menu order (installed by the seed-categories command). */
+export const FOODCOURT_CATEGORIES: readonly { icon: CategoryIcon; name: string }[] = [
+  { icon: 'pizza', name: 'پیتزا' },
+  { icon: 'burger', name: 'برگر' },
+  { icon: 'kebab', name: 'گریل و کباب' },
+  { icon: 'fried-chicken', name: 'سوخاری' },
+  { icon: 'iranian', name: 'غذای ایرانی' },
+  { icon: 'coffee', name: 'قهوه' },
+  { icon: 'tea', name: 'چای و دمنوش' },
+  { icon: 'dessert', name: 'دسر' },
+];
 export const CategoryIconSchema = z.enum(CATEGORY_ICON_KEYS);
 
 export const FOOD_TINTS = ['food-tint-1', 'food-tint-2', 'food-tint-3', 'food-tint-4'] as const;
