@@ -44,7 +44,7 @@ Stack traces and internal values are never returned.
   CSRF token in `x-csrf-token` (returned by login and `/api/auth/me`).
 - Passwords: scrypt (Node `crypto`, N=2^15, r=8, p=1, 16-byte salt). Policy for new passwords: at least
   8 characters, at least one letter and one digit. Hashes are never returned or logged.
-- Rate limits: 300 requests/min per IP overall; login `LOGIN_RATE_LIMIT_PER_15M` (default 10) per IP+username
+- Rate limits: 1200 requests/min per IP overall (food-court customers share one NAT address), media reads unlimited; login `LOGIN_RATE_LIMIT_PER_15M` (default 10) per IP+username
   per 15 min; change-password 10 per 15 min; popularity 60 per minute per IP. Counters are in memory (single API instance).
 - Authorization is enforced server-side only: `requireAccount`, `requireRole`, `requireStallAccess`
   in `apps/api/src/auth/guards.ts`. Stall ownership comes from the account record, never from the client.

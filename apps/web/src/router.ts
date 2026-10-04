@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import type { Role } from '@elay/shared';
-import { adminHome, ensureSession } from './api';
+import { adminHome, ensureSession, setSessionLostHandler } from './api';
 // Customer screens are bundled eagerly so an offline reload (service worker) has every chunk.
 import CustomerLayout from './customer/CustomerLayout.vue';
 import CategoryView from './customer/views/CategoryView.vue';
@@ -14,6 +14,8 @@ declare module 'vue-router' {
   interface RouteMeta {
     role?: Role;
     noOrderBar?: boolean;
+    /** Panel form screen: own header + ActionBar instead of AdminHeader + AdminTabBar. */
+    form?: boolean;
   }
 }
 
@@ -36,7 +38,19 @@ export const router = createRouter({
     },
     { path: '/admin/login', component: () => import('./views/AdminLogin.vue') },
     { path: '/admin', redirect: '/admin/login' },
-    { path: '/admin/stall', component: () => import('./views/AdminShell.vue'), meta: { role: 'stall_admin' } },
+    {
+      path: '/admin/stall',
+      component: () => import('./admin/stall/StallLayout.vue'),
+      meta: { role: 'stall_admin' },
+      children: [
+        { path: '', component: () => import('./admin/stall/FoodsView.vue') },
+        { path: 'foods/new', component: () => import('./admin/stall/FoodFormView.vue'), meta: { form: true } },
+        { path: 'foods/:id', component: () => import('./admin/stall/FoodFormView.vue'), props: true, meta: { form: true } },
+        { path: 'categories', component: () => import('./admin/stall/CategoriesView.vue') },
+        { path: 'profile', component: () => import('./admin/stall/ProfileView.vue') },
+        { path: 'account', component: () => import('./admin/stall/AccountView.vue') },
+      ],
+    },
     { path: '/admin/super', component: () => import('./views/AdminShell.vue'), meta: { role: 'super_admin' } },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
@@ -51,3 +65,6 @@ router.beforeEach(async (to) => {
   if (to.meta.role && to.meta.role !== account.role) return adminHome(account);
   return true;
 });
+
+// Session expired or revoked (e.g. password reset by the super admin): back to the shared login.
+setSessionLostHandler(() => void router.replace('/admin/login'));

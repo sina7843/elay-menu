@@ -12,10 +12,18 @@ export class ApiRequestError extends Error {
 
 let csrfToken: string | null = null;
 
-export async function api<T>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
+/** Called when the server says the session is gone (expired, revoked, password reset by the super admin). */
+let onSessionLost: () => void = () => undefined;
+export const setSessionLostHandler = (fn: () => void) => (onSessionLost = fn);
+
+export async function api<T>(
+  path: string,
+  init: { method?: string; body?: unknown; raw?: Blob; type?: string } = {},
+): Promise<T> {
   const method = init.method ?? 'GET';
   const headers: Record<string, string> = {};
-  if (init.body !== undefined) headers['content-type'] = 'application/json';
+  if (init.raw) headers['content-type'] = init.type ?? init.raw.type;
+  else if (init.body !== undefined) headers['content-type'] = 'application/json';
   if (method !== 'GET' && csrfToken) headers['x-csrf-token'] = csrfToken;
   let res: Response;
   try {
@@ -23,7 +31,7 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
       method,
       headers,
       credentials: 'same-origin',
-      body: init.body === undefined ? undefined : JSON.stringify(init.body),
+      body: init.raw ?? (init.body === undefined ? undefined : JSON.stringify(init.body)),
     });
   } catch {
     throw new ApiRequestError(0, null);
@@ -32,7 +40,10 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
   const data = await res.json().catch(() => null);
   if (!res.ok) {
     // Expired or revoked session: forget it so the router guard sends the admin back to login.
-    if (res.status === 401 && path !== '/api/auth/login') apply(null);
+    if (res.status === 401 && path !== '/api/auth/login' && account.value) {
+      apply(null);
+      onSessionLost();
+    }
     throw new ApiRequestError(res.status, data as ApiError | null);
   }
   return data as T;
@@ -66,12 +77,14 @@ export async function login(username: string, password: string) {
   return account.value!;
 }
 
+/** Clears the local session only once the server session is gone (204, or already 401). */
 export async function logout() {
   try {
     await api('/api/auth/logout', { method: 'POST' });
-  } finally {
-    apply(null);
+  } catch (e) {
+    if (!(e instanceof ApiRequestError && e.status === 401)) throw e;
   }
+  apply(null);
 }
 
 export const adminHome = (a: AccountResponse) => (a.role === 'super_admin' ? '/admin/super' : '/admin/stall');

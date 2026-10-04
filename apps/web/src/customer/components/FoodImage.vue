@@ -4,7 +4,8 @@ import { computed } from 'vue';
 import type { PublicFood } from '@elay/shared';
 import { fa } from '../format';
 
-const props = defineProps<{ food: PublicFood; rank?: number; dim?: boolean }>();
+// Accepts customer and panel food shapes so admins see exactly the customer tile.
+const props = defineProps<{ food: Pick<PublicFood, 'id' | 'name' | 'imageUrl' | 'tint'>; rank?: number; dim?: boolean }>();
 
 const tint = computed(() => (props.food.tint === 'food-tint-1' ? '' : `el-food-img--t${props.food.tint.slice(-1)}`));
 

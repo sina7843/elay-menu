@@ -86,3 +86,54 @@ test('capture customer screens', async ({ page }) => {
     await control({ op: 'menu', open: true });
   }
 });
+
+test('capture stall-admin screens', async ({ page }) => {
+  test.setTimeout(120_000);
+  await control({ op: 'reset' });
+  await page.clock.setFixedTime(new Date('2026-10-04T10:00:00Z'));
+  await control({ op: 'stallAdmin', stall: 'cheezo', username: 'cheezo', password: 'cheezo123' });
+  await control({ op: 'emptyStall', name: 'غرفه‌ی تازه', username: 'tazeh', password: 'tazeh1234' });
+  const signIn = async (u: string, p: string) => {
+    await page.goto('/admin/login');
+    await page.getByLabel('نام کاربری').fill(u);
+    await page.getByLabel('رمز عبور').fill(p);
+  };
+  await signIn('tazeh', 'tazeh1234');
+  await shot(page, 'Admin-Login', false);
+  await page.getByRole('button', { name: 'ورود' }).click();
+  await page.waitForSelector('.ad-steps');
+  await shot(page, 'Admin-Empty', false);
+  await page.getByRole('link', { name: 'خروج' }).count();
+  await page.goto('/admin/stall/account');
+  await page.getByRole('button', { name: 'خروج از پنل' }).click();
+  await signIn('cheezo', 'cheezo123');
+  await page.getByRole('button', { name: 'ورود' }).click();
+  await page.waitForSelector('.ad-food');
+  await shot(page, 'Admin-Foods', false);
+  await page.locator('.ad-food').first().getByRole('link').click();
+  await page.getByRole('switch', { name: /تخفیف/ }).click();
+  await page.getByLabel('درصد تخفیف').fill('15');
+  await shot(page, 'Admin-FoodForm');
+  await page.getByRole('button', { name: 'حذف این غذا' }).click();
+  await shot(page, 'Admin-Dialog', false);
+  await page.keyboard.press('Escape');
+  await page.goto('/admin/stall/foods/new');
+  await page.getByLabel('نام غذا').fill('پیتزا مارگاریتا');
+  await page.getByRole('button', { name: 'افزودن به منو' }).click();
+  await shot(page, 'Admin-FoodNew');
+  const sharp = (await import('sharp')).default;
+  const png = await sharp({ create: { width: 900, height: 600, channels: 4, background: { r: 180, g: 60, b: 30, alpha: 1 } } }).png().toBuffer();
+  await page.locator('input[type=file]').setInputFiles({ name: 'p.png', mimeType: 'image/png', buffer: png });
+  await page.waitForSelector('.ad-crop');
+  await page.waitForTimeout(300);
+  await shot(page, 'Admin-Crop', false);
+  await page.goto('/admin/stall/categories');
+  await shot(page, 'Admin-Categories', false);
+  await page.goto('/admin/stall/profile');
+  await shot(page, 'Admin-Stall');
+  await page.goto('/admin/stall/account');
+  await page.getByLabel('رمز فعلی').fill('cheezo123');
+  await page.getByLabel('رمز تازه', { exact: true }).fill('newpass123');
+  await page.getByLabel('تکرار رمز تازه').fill('newpass12');
+  await shot(page, 'Admin-Account');
+});

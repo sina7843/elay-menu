@@ -3,6 +3,7 @@
 // Tab stays inside, focus returns to the opener.
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 
+defineProps<{ fullscreen?: boolean }>();
 const emit = defineEmits<{ close: [] }>();
 const layer = ref<HTMLElement | null>(null);
 const opener = document.activeElement as HTMLElement | null;
@@ -41,8 +42,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="layer" class="app-layer">
-    <div class="el-overlay" @click="emit('close')"></div>
+  <div ref="layer" :class="fullscreen ? 'app-screen' : 'app-layer'">
+    <div v-if="!fullscreen" class="el-overlay" @click="emit('close')"></div>
     <slot />
   </div>
 </template>

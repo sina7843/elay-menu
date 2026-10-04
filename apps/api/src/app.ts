@@ -51,7 +51,9 @@ export async function buildApp(
   installErrorHandling(app);
 
   await app.register(cookie);
-  await app.register(rateLimit, { global: true, max: 300, timeWindow: '1 minute' });
+  // Customers in the food court share one Wi-Fi/NAT address, so the per-IP ceiling must cover many phones.
+  // ponytail: in-memory per-IP counters; move to a shared store if the API ever runs as several instances.
+  await app.register(rateLimit, { global: true, max: 1200, timeWindow: '1 minute' });
   app.addHook('onRequest', async (req) => checkOrigin(req));
   // Admin/auth responses can carry one-time temporary passwords and private data: never cache them.
   app.addHook('onSend', async (req, reply) => {

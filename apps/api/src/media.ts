@@ -26,7 +26,8 @@ const TYPES: Record<string, string> = {
 
 /** Read-only media serving. Names are server-generated and validated, so no path traversal is possible. */
 export async function mediaRoutes(app: FastifyInstance) {
-  app.get<{ Params: { name: string } }>('/api/media/:name', async (req, reply) => {
+  // Static image reads: not rate limited (a menu page loads dozens; whole food court shares one IP).
+  app.get<{ Params: { name: string } }>('/api/media/:name', { config: { rateLimit: false } }, async (req, reply) => {
     const parsed = MediaNameSchema.safeParse(req.params.name);
     if (!parsed.success) throw notFound();
     const file = mediaPath(app.ctx, parsed.data);

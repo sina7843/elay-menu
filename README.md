@@ -4,7 +4,7 @@ Mobile web menu for the Elay food court, with a stall-admin panel and a super-ad
 Persian, right-to-left, light theme only. The app takes no orders and no payments: the order list stays
 on the customer's phone and is read aloud to each stall's cashier.
 
-Status: DRAGON-02. The customer menu is complete (all 14 handoff customer screens on live API data, local order list, offline cache). The stall-admin and super-admin screens arrive in DRAGON-03/04; their API is ready (see `docs/api.md`).
+Status: DRAGON-03. The customer menu and the stall-admin panel (/admin/stall) are complete on live API data. The super-admin screens arrive in DRAGON-04; their API is ready (see `docs/api.md`).
 
 ## Layout
 

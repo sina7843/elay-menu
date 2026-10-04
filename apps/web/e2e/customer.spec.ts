@@ -100,7 +100,8 @@ test('sold out and deleted foods: listed but not addable, excluded from rails an
   await control({ op: 'available', food: 'cheezo:pepperoni', value: false });
   await control({ op: 'deleteFood', food: 'dokhan-dokan:koobideh' });
   await page.goto('/');
-  await expect(page.locator('.el-promo--popular')).toHaveCount(0); // its only ranked food is sold out
+  await expect(page.locator('.el-promo--popular .el-food-card').first()).toBeVisible(); // + clicks above were counted
+  await expect(page.locator('.el-promo--popular')).not.toContainText('پیتزا پپرونی'); // ranked first by adds, but sold out
 
   await page.goto('/stall/' + (await stallId(page, 'پیتزا چیزو')));
   const sold = row(page, 'پیتزا پپرونی');
