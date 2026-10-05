@@ -17,8 +17,9 @@ export const API_PORT = 5310;
 export const CONTROL_PORT = 5311;
 const START = '2026-10-04T10:00:00Z'; // Sunday 13:30 Tehran: every demo stall open except هارمونی (18:00–02:00)
 
-const mem = await MongoMemoryServer.create();
-const client = await MongoClient.connect(mem.getUri());
+// In-memory mongod by default; MONGODB_TEST_URI (e.g. a local container) when the binary cannot be downloaded.
+const uri = process.env.MONGODB_TEST_URI ?? (await MongoMemoryServer.create()).getUri();
+const client = await MongoClient.connect(uri);
 const db = client.db('elay_e2e');
 const c = collections(db);
 const mediaDir = await mkdtemp(path.join(os.tmpdir(), 'elay-e2e-media-'));
@@ -33,7 +34,7 @@ async function reset() {
 await reset();
 
 // Many sign-ins per test run from one address: the login limit itself is covered by the API tests.
-const config = loadConfig({ NODE_ENV: 'test', MONGODB_URI: mem.getUri(), MEDIA_DIR: mediaDir, COOKIE_SECURE: 'false', LOGIN_RATE_LIMIT_PER_15M: '1000' });
+const config = loadConfig({ NODE_ENV: 'test', MONGODB_URI: uri, MEDIA_DIR: mediaDir, COOKIE_SECURE: 'false', LOGIN_RATE_LIMIT_PER_15M: '1000' });
 const app = await buildApp(config, db, false, () => clock.now);
 await app.listen({ host: '127.0.0.1', port: API_PORT });
 

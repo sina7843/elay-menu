@@ -180,3 +180,39 @@ select.ad-time {
 .ad-food .el-food-img,
 .ad-upload .el-food-img { padding: 3%; }
 .el-food-img.el-food-img--placeholder { padding: 0; }
+
+/* ---------- Header (Elay-Header package): glass, 64px, 1px line, shadow after scroll; replaces the zigzag. ---------- */
+:root {
+  --header-h: 64px;
+  --header-glass: rgba(248, 243, 234, 0.92);
+  --glass-blur: 16px;
+  --shadow-header: 0 8px 18px -12px rgba(27, 21, 18, 0.35);
+}
+.el-header {
+  height: var(--header-h);
+  padding: 0 var(--space-4);
+  border-bottom: 1px solid var(--line);
+  background: var(--header-glass);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
+  transition: box-shadow 0.2s ease;
+}
+.el-header--scrolled { box-shadow: var(--shadow-header); }
+.el-header__home {
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  min-height: var(--touch);
+}
+/* Sticky stall tabs share the glass and stick right under the header. */
+.el-tabs {
+  top: var(--header-h);
+  background: var(--header-glass);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
+  z-index: 4;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .el-header,
+  .el-tabs { background: var(--surface); }
+}

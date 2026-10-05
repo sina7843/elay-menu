@@ -31,7 +31,7 @@ const apply = (f: Filters) => {
 </script>
 
 <template>
-  <CustHeader />
+  <CustHeader :title="`فودکورت ${menu.foodcourt.name}`" />
   <main>
     <div class="pad mt-4"><SearchField v-model="text" filter @submit="search" @filter="sheet = true" /></div>
 

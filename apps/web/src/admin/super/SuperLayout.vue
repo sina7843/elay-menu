@@ -13,7 +13,7 @@ void loadSuper();
 const tabs = [
   { to: '/admin/super', icon: 'store', label: 'غرفه‌ها', exact: true },
   { to: '/admin/super/categories', icon: 'grid', label: 'دسته‌ها' },
-  { to: '/admin/super/settings', icon: 'filter', label: 'تنظیمات' },
+  { to: '/admin/super/settings', icon: 'settings', label: 'تنظیمات' },
 ];
 const current = (t: (typeof tabs)[number]) => (t.exact ? route.path === t.to || route.path.startsWith('/admin/super/stalls') : route.path.startsWith(t.to));
 </script>

@@ -295,3 +295,16 @@ async function stallId(page: Page, name: string): Promise<string> {
   const menu = (await res.json()) as { stalls: { id: string; name: string }[] };
   return menu.stalls.find((s) => s.name === name)!.id;
 }
+
+test('header: home title, logo returns to the main page, glass header gets a shadow after scroll', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.el-header__title')).toHaveText('فودکورت ال‌آی');
+  await expect(page.locator('.el-header')).not.toHaveClass(/el-header--scrolled/);
+  await page.evaluate(() => window.scrollTo(0, 600));
+  await expect(page.locator('.el-header')).toHaveClass(/el-header--scrolled/);
+  await page.locator('.el-stall').first().click();
+  await expect(page).toHaveURL(/\/stall\//);
+  await page.getByRole('link', { name: /صفحه‌ی اول منوی/ }).click();
+  await expect(page).toHaveURL(/127\.0\.0\.1:5399\/$/);
+  await expect(page.locator('.el-header__zigzag')).toHaveCount(0);
+});

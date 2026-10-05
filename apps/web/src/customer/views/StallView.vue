@@ -121,8 +121,8 @@ function go(id: string) {
 </template>
 
 <style scoped>
-/* Land section headings below the sticky header (70px) + tabs (~50px). */
+/* Land section headings below the sticky header (64px) + tabs (~50px). */
 .stall-section-head {
-  scroll-margin-top: 128px;
+  scroll-margin-top: 122px;
 }
 </style>

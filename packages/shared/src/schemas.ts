@@ -28,7 +28,7 @@ export const NewPasswordSchema = z
   .max(128, 'رمز طولانی است.')
   .refine((v) => /\p{L}/u.test(v) && /\p{Nd}/u.test(v), 'رمز باید حرف و عدد داشته باشد.');
 
-/** Foodcourt category icons. The first eight are the food court's categories; the last three stay valid for older data. */
+/** Foodcourt category icons (Elay-Category-Icons set + غذای ایرانی). The first eight are the food court's categories. */
 export const CATEGORY_ICON_KEYS = [
   'pizza',
   'burger',
@@ -38,6 +38,9 @@ export const CATEGORY_ICON_KEYS = [
   'coffee',
   'tea',
   'dessert',
+  'grill',
+  'milkshake',
+  'smoothie',
   'steak',
   'sushi',
   'sandwich',
